@@ -1,5 +1,5 @@
 # TVS Sentinel - Backend Dependencies
-# Compatible with Python 3.13
+# Fully compatible with Python 3.13
 
 # API Framework
 fastapi>=0.115.0
@@ -11,16 +11,16 @@ python-multipart>=0.0.9
 
 # Graph Analysis
 networkx>=3.3
-python-louvain>=0.16        # community detection (Louvain algorithm)
-node2vec>=0.4.6              # graph embeddings
+python-louvain>=0.16        # Community detection (Louvain algorithm)
 
 # Machine Learning
-scikit-learn>=1.6.0          # 1.6+ has Python 3.13 wheels
-numpy>=1.26.4
+scikit-learn>=1.6.0          # Isolation Forest and ML pipelines
+numpy>=2.1.0                 # Python 3.13 compatible
 pandas>=2.2.2
 
 # Data Generation
-faker>=28.4.1                # realistic synthetic names, addresses, phones
+faker>=28.4.1                # Realistic synthetic names, addresses, phones
 
-# Utilities
+# Testing & Utilities
 python-dateutil>=2.9.0
+pytest>=8.0.0
