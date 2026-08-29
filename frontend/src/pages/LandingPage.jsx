@@ -20,13 +20,13 @@ export default function LandingPage() {
       style={{
         minHeight: '100vh',
         width: '100%',
-        backgroundColor: '#07070a',
+        backgroundColor: '#030305',
         backgroundImage: `
-          radial-gradient(circle at 18% 18%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
-          radial-gradient(circle at 75% 35%, rgba(168, 85, 247, 0.18) 0%, transparent 45%),
-          radial-gradient(circle at 50% 85%, rgba(225, 29, 72, 0.08) 0%, transparent 50%)
+          radial-gradient(circle at 18% 18%, rgba(79, 70, 229, 0.12) 0%, transparent 40%),
+          radial-gradient(circle at 75% 35%, rgba(168, 85, 247, 0.14) 0%, transparent 45%),
+          radial-gradient(circle at 50% 85%, rgba(225, 29, 72, 0.06) 0%, transparent 50%)
         `,
-        color: '#f4f4f5',
+        color: '#f8fafc',
         fontFamily: "'Plus Jakarta Sans', sans-serif",
         position: 'relative',
         overflowX: 'hidden',

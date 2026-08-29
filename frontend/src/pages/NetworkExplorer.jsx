@@ -1,9 +1,9 @@
-﻿import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Network, Filter, X, ZoomIn, ZoomOut, Maximize2,
   AlertTriangle, Cpu, User, Building2, CreditCard,
-  Smartphone, MapPin, Shield, ChevronRight,
+  Smartphone, MapPin, Shield, ChevronRight, RefreshCw,
 } from 'lucide-react';
 import NetworkGraph from '../components/graph/NetworkGraph';
 import { getGraph, getNodeById } from '../utils/api';
@@ -27,15 +27,18 @@ const RISK_MAX = 100;
 function RiskBadge({ score }) {
   const lvl = getRiskLevel(score ?? 0);
   return (
-    <span style={{
-      fontSize:      '11px',
-      fontWeight:    700,
-      color:         lvl.color,
-      background:    `${lvl.color}20`,
-      border:        `1px solid ${lvl.color}50`,
-      borderRadius:  '6px',
-      padding:       '2px 8px',
-    }}>
+    <span
+      style={{
+        fontSize:      '11px',
+        fontWeight:    700,
+        color:         lvl.color,
+        background:    `${lvl.color}15`,
+        border:        `1px solid ${lvl.color}40`,
+        borderRadius:  '999px',
+        padding:       '3px 10px',
+        fontFamily:    'JetBrains Mono, monospace',
+      }}
+    >
       {lvl.label} {(score ?? 0).toFixed(1)}
     </span>
   );
@@ -58,7 +61,7 @@ export default function NetworkExplorer() {
   const [detailLoading,  setDetailLoading]  = useState(false);
 
   // ── Load graph ────────────────────────────────────────────────────────────
-  useEffect(() => {
+  const fetchGraphData = () => {
     setLoading(true);
     setError(null);
     getGraph()
@@ -68,7 +71,9 @@ export default function NetworkExplorer() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchGraphData(); }, []);
 
   // ── Filter nodes / edges ──────────────────────────────────────────────────
   const { filteredNodes, filteredEdges } = useMemo(() => {
@@ -136,36 +141,38 @@ export default function NetworkExplorer() {
   }, [selectedId, allEdges, allNodes]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
 
-      {/* ── Top Bar ──────────────────────────────────────────────────────── */}
+      {/* ── Top Bar with Capsule Controls ── */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
+        className="inv-card"
         style={{
           display:       'flex',
           alignItems:    'center',
-          gap:           '12px',
-          padding:       '0 0 16px 0',
+          gap:           '16px',
+          padding:       '16px 24px',
           flexWrap:      'wrap',
           flexShrink:    0,
         }}
       >
         {/* Title */}
         <div style={{ marginRight: 'auto' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Network size={20} color="#00d4ff" />
-            Network Explorer
-          </h1>
-          <p style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Network size={20} color="#818cf8" />
+            <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>
+              Network Explorer
+            </h1>
+          </div>
+          <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0', fontFamily: 'JetBrains Mono, monospace' }}>
             {filteredNodes.length.toLocaleString()} nodes · {filteredEdges.length.toLocaleString()} edges
-            {allNodes.length !== filteredNodes.length && ` (filtered from ${allNodes.length.toLocaleString()})`}
+            {allNodes.length !== filteredNodes.length && ` (of ${allNodes.length.toLocaleString()})`}
           </p>
         </div>
 
-        {/* Entity type toggles */}
+        {/* Entity type capsule toggles */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <Filter size={13} color="#64748b" />
           {ENTITY_TYPES.map(({ key, label, icon: Icon, color }) => {
             const active = activeTypes.has(key);
             return (
@@ -175,28 +182,39 @@ export default function NetworkExplorer() {
                 style={{
                   display:      'flex',
                   alignItems:   'center',
-                  gap:          '5px',
-                  padding:      '5px 10px',
-                  borderRadius: '20px',
+                  gap:          '6px',
+                  padding:      '6px 12px',
+                  borderRadius: '999px',
                   border:       `1px solid ${active ? color : 'rgba(255,255,255,0.08)'}`,
-                  background:   active ? `${color}20` : 'transparent',
-                  color:        active ? color : '#475569',
+                  background:   active ? `${color}18` : 'rgba(18, 18, 26, 0.6)',
+                  color:        active ? '#ffffff' : '#71717a',
                   fontSize:     '11px',
                   fontWeight:   600,
                   cursor:       'pointer',
-                  transition:   'all 0.15s ease',
+                  boxShadow:    active ? `0 0 10px ${color}30` : 'none',
+                  transition:   'all 0.2s ease',
                 }}
               >
-                <Icon size={11} />
+                <Icon size={12} color={active ? color : '#71717a'} />
                 {label}
               </button>
             );
           })}
         </div>
 
-        {/* Risk slider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '220px' }}>
-          <span style={{ fontSize: '11px', color: '#64748b', whiteSpace: 'nowrap' }}>Risk ≥</span>
+        {/* Risk slider capsule */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: 'rgba(18, 18, 26, 0.7)',
+            padding: '6px 14px',
+            borderRadius: '999px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+          }}
+        >
+          <span style={{ fontSize: '11px', color: '#71717a', fontWeight: 600, whiteSpace: 'nowrap' }}>Risk ≥</span>
           <input
             type="range"
             min={0}
@@ -204,34 +222,34 @@ export default function NetworkExplorer() {
             step={5}
             value={riskRange[0]}
             onChange={(e) => setRiskRange([Number(e.target.value), riskRange[1]])}
-            style={{ flex: 1, accentColor: '#00d4ff' }}
+            style={{ width: '100px', accentColor: '#6366f1' }}
           />
-          <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#00d4ff', minWidth: '28px' }}>
+          <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#818cf8', fontWeight: 700, minWidth: '24px' }}>
             {riskRange[0]}
           </span>
         </div>
       </motion.div>
 
-      {/* ── Graph + Sidebar ───────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flex: 1, gap: '16px', minHeight: 0 }}>
+      {/* ── Graph Canvas + Side Inspector ── */}
+      <div style={{ display: 'flex', flex: 1, gap: '16px', minHeight: '560px' }}>
 
         {/* Graph canvas */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="glass-card"
+          className="inv-card"
           style={{ flex: 1, position: 'relative', minHeight: 0, overflow: 'hidden' }}
         >
           {loading ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '12px', color: '#64748b' }}>
-              <div style={{ width: '32px', height: '32px', border: '3px solid #1a1e3a', borderTop: '3px solid #00d4ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              <span style={{ fontSize: '13px' }}>Loading graph…</span>
+              <div style={{ width: '36px', height: '36px', border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              <span style={{ fontSize: '13px' }}>Rendering Living Graph Twin…</span>
             </div>
           ) : error ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '8px', color: '#ef4444' }}>
-              <AlertTriangle size={32} />
-              <p style={{ fontSize: '13px' }}>{error}</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '10px', color: '#f43f5e' }}>
+              <AlertTriangle size={36} />
+              <p style={{ fontSize: '14px' }}>{error}</p>
             </div>
           ) : (
             <NetworkGraph
@@ -244,15 +262,15 @@ export default function NetworkExplorer() {
             />
           )}
 
-          {/* Hint overlay */}
+          {/* Canvas Hint */}
           {!loading && !error && (
-            <div style={{ position: 'absolute', bottom: '12px', left: '12px', fontSize: '11px', color: '#334155', pointerEvents: 'none' }}>
-              Click node to inspect · Double-click canvas to fit · Scroll to zoom
+            <div style={{ position: 'absolute', bottom: '14px', left: '16px', fontSize: '11px', color: '#64748b', pointerEvents: 'none', fontFamily: 'JetBrains Mono, monospace' }}>
+              Click node to isolate • Drag to pan • Scroll to zoom
             </div>
           )}
         </motion.div>
 
-        {/* Right sidebar */}
+        {/* Right Node Inspector */}
         <AnimatePresence>
           {selectedNode && (
             <motion.div
@@ -261,37 +279,37 @@ export default function NetworkExplorer() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.2 }}
-              className="glass-card"
-              style={{ width: '300px', flexShrink: 0, padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}
+              className="inv-card"
+              style={{ width: '320px', flexShrink: 0, padding: '22px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}
             >
               {/* Header */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: NODE_COLORS[selectedNode.type] ?? '#94a3b8', marginBottom: '2px', textTransform: 'capitalize' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: NODE_COLORS[selectedNode.type] ?? '#94a3b8', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
                     {selectedNode.type?.replace('_', ' ') ?? 'Entity'}
                   </div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#e2e8f0', wordBreak: 'break-all' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#f8fafc', wordBreak: 'break-all', fontFamily: 'Outfit, sans-serif' }}>
                     {selectedNode.label ?? selectedNode.id}
                   </div>
                 </div>
                 <button
                   onClick={clearSelection}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '2px' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#71717a', padding: '4px' }}
                 >
                   <X size={16} />
                 </button>
               </div>
 
-              {/* Risk score */}
-              <div style={{ padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Risk Score</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: getRiskLevel(selectedNode.risk_score ?? 0).color }}>
+              {/* Risk score gauge card */}
+              <div style={{ padding: '14px 16px', borderRadius: '14px', background: 'rgba(18, 18, 26, 0.7)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                <div style={{ fontSize: '10px', color: '#71717a', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700 }}>Anomaly Risk Score</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '32px', fontWeight: 900, fontFamily: 'JetBrains Mono, monospace', color: getRiskLevel(selectedNode.risk_score ?? 0).color, lineHeight: 1 }}>
                     {(selectedNode.risk_score ?? 0).toFixed(1)}
                   </span>
                   <div style={{ flex: 1 }}>
                     <RiskBadge score={selectedNode.risk_score} />
-                    <div style={{ marginTop: '6px', height: '4px', borderRadius: '2px', background: '#1a1e3a', overflow: 'hidden' }}>
+                    <div style={{ marginTop: '8px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${selectedNode.risk_score ?? 0}%`, borderRadius: '2px', background: getRiskLevel(selectedNode.risk_score ?? 0).color, transition: 'width 0.6s ease' }} />
                     </div>
                   </div>
@@ -300,21 +318,21 @@ export default function NetworkExplorer() {
 
               {/* ID */}
               <div>
-                <div style={{ fontSize: '10px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Entity ID</div>
+                <div style={{ fontSize: '10px', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700, marginBottom: '4px' }}>System Entity ID</div>
                 <div style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#94a3b8', wordBreak: 'break-all' }}>{selectedNode.id}</div>
               </div>
 
               {/* API detail attributes */}
               {detailLoading && (
-                <div style={{ fontSize: '12px', color: '#475569' }}>Loading detail…</div>
+                <div style={{ fontSize: '12px', color: '#71717a' }}>Querying intelligence ledger…</div>
               )}
               {nodeDetail && !detailLoading && nodeDetail.attributes && (
                 <div>
-                  <div style={{ fontSize: '10px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Attributes</div>
+                  <div style={{ fontSize: '10px', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700, marginBottom: '8px' }}>Metadata Attributes</div>
                   {Object.entries(nodeDetail.attributes).slice(0, 8).map(([k, v]) => (
                     <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}</span>
-                      <span style={{ fontSize: '11px', color: '#94a3b8', fontFamily: 'JetBrains Mono, monospace' }}>
+                      <span style={{ fontSize: '11px', color: '#71717a', textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}</span>
+                      <span style={{ fontSize: '11px', color: '#f8fafc', fontFamily: 'JetBrains Mono, monospace' }}>
                         {String(v).length > 18 ? String(v).slice(0, 18) + '…' : String(v)}
                       </span>
                     </div>
@@ -322,14 +340,14 @@ export default function NetworkExplorer() {
                 </div>
               )}
 
-              {/* Connections */}
+              {/* Connected Relationships */}
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '10px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
-                  Connections ({nodeConnections.length})
+                <div style={{ fontSize: '10px', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700, marginBottom: '8px' }}>
+                  Connected Relationships ({nodeConnections.length})
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '240px', overflowY: 'auto' }}>
                   {nodeConnections.length === 0 && (
-                    <div style={{ fontSize: '12px', color: '#334155' }}>No visible connections in current filter.</div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>No visible connections in current filter.</div>
                   )}
                   {nodeConnections.map(({ edge, peer }, i) => (
                     <div
@@ -338,27 +356,33 @@ export default function NetworkExplorer() {
                       style={{
                         display:      'flex',
                         alignItems:   'center',
-                        gap:          '8px',
-                        padding:      '7px 10px',
-                        borderRadius: '8px',
-                        background:   'rgba(255,255,255,0.03)',
-                        border:       '1px solid rgba(255,255,255,0.05)',
+                        gap:          '10px',
+                        padding:      '8px 12px',
+                        borderRadius: '10px',
+                        background:   'rgba(18, 18, 26, 0.6)',
+                        border:       '1px solid rgba(255, 255, 255, 0.05)',
                         cursor:       peer ? 'pointer' : 'default',
-                        transition:   'border-color 0.15s ease',
+                        transition:   'border-color 0.15s ease, background 0.15s ease',
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.3)'}
-                      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                        e.currentTarget.style.background = 'rgba(24, 24, 36, 0.8)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.background = 'rgba(18, 18, 26, 0.6)';
+                      }}
                     >
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0, background: peer ? (NODE_COLORS[peer.type] ?? '#94a3b8') : '#334155' }} />
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0, background: peer ? (NODE_COLORS[peer.type] ?? '#94a3b8') : '#64748b' }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '12px', color: '#f8fafc', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {peer?.label ?? peer?.id ?? '(hidden)'}
                         </div>
-                        <div style={{ fontSize: '10px', color: '#475569', textTransform: 'capitalize' }}>
+                        <div style={{ fontSize: '10px', color: '#71717a', textTransform: 'capitalize' }}>
                           {peer?.type?.replace('_', ' ')} {edge.label ? `· ${edge.label}` : ''}
                         </div>
                       </div>
-                      {peer && <ChevronRight size={12} color="#334155" />}
+                      {peer && <ChevronRight size={14} color="#71717a" />}
                     </div>
                   ))}
                 </div>
