@@ -205,26 +205,136 @@ class SentinelGraph:
                 return g
         return None
 
+    # ── Node Styling Constants ──
+    NODE_STYLES = {
+        "customer": {"color": "#3b82f6", "shape": "dot", "base_size": 18},
+        "device": {"color": "#f97316", "shape": "diamond", "base_size": 22},
+        "dealer": {"color": "#10b981", "shape": "square", "base_size": 26},
+        "bank_account": {"color": "#8b5cf6", "shape": "dot", "base_size": 16},
+        "mobile": {"color": "#06b6d4", "shape": "triangle", "base_size": 16},
+        "location": {"color": "#ec4899", "shape": "hexagon", "base_size": 24},
+        "guarantor": {"color": "#f59e0b", "shape": "star", "base_size": 20},
+        "loan_application": {"color": "#6366f1", "shape": "dot", "base_size": 18},
+    }
+
+    def _format_node(self, node_id: str, data: dict) -> dict:
+        """Format node with visual attributes for vis-network."""
+        node_type = data.get("type", "unknown")
+        style = self.NODE_STYLES.get(node_type, {"color": "#94a3b8", "shape": "dot", "base_size": 16})
+        risk = float(data.get("risk_score", 0))
+        
+        # Scale size by risk score
+        scaled_size = round(style["base_size"] + (risk / 100.0) * 14)
+        
+        # Color based on risk if extreme, otherwise node-type color
+        base_color = style["color"]
+        if risk >= 80:
+            border_color = "#dc2626"
+            highlight_color = "#ef4444"
+        elif risk >= 50:
+            border_color = "#f59e0b"
+            highlight_color = "#fbbf24"
+        else:
+            border_color = base_color
+            highlight_color = base_color
+
+        label = data.get("label", node_id)
+        tooltip = f"<b>{label}</b><br/>Type: {node_type}<br/>Risk Score: {risk:.1f}/100"
+        
+        return {
+            "id": node_id,
+            "label": label,
+            "type": node_type,
+            "risk_score": risk,
+            "color": {
+                "background": base_color,
+                "border": border_color,
+                "highlight": {"background": highlight_color, "border": "#ffffff"},
+            },
+            "size": scaled_size,
+            "shape": style["shape"],
+            "title": tooltip,
+            "metadata": {k: v for k, v in data.items() 
+                        if k not in ("type", "label", "risk_score")},
+        }
+
     # ── Query Methods ──
 
     def get_all_nodes(self, node_type: str | None = None, 
-                      min_risk: float = 0) -> list[dict]:
-        """Get all nodes, optionally filtered by type and minimum risk score."""
+                      min_risk: float = 0,
+                      max_risk: float = 100) -> list[dict]:
+        """Get all nodes, optionally filtered by type and risk score range."""
         nodes = []
         for node_id, data in self.graph.nodes(data=True):
             if node_type and data.get("type") != node_type:
                 continue
-            if data.get("risk_score", 0) < min_risk:
+            risk = data.get("risk_score", 0)
+            if risk < min_risk or risk > max_risk:
                 continue
-            nodes.append({
-                "id": node_id,
-                "label": data.get("label", node_id),
-                "type": data.get("type", "unknown"),
-                "risk_score": data.get("risk_score", 0),
-                "metadata": {k: v for k, v in data.items() 
-                           if k not in ("type", "label", "risk_score")},
-            })
+            nodes.append(self._format_node(node_id, data))
         return nodes
+
+    def get_filtered_graph(
+        self,
+        node_types: list[str] | None = None,
+        min_risk: float = 0,
+        max_risk: float = 100,
+        search: str | None = None,
+        limit: int = 1500,
+        include_neighbors: bool = False
+    ) -> tuple[list[dict], list[dict]]:
+        """
+        Advanced filtered graph query with neighbor expansion and limits.
+        """
+        candidate_ids = set()
+        search_lower = search.lower() if search else None
+        
+        for node_id, data in self.graph.nodes(data=True):
+            n_type = data.get("type", "")
+            if node_types and n_type not in node_types:
+                continue
+            
+            risk = data.get("risk_score", 0)
+            if risk < min_risk or risk > max_risk:
+                continue
+            
+            if search_lower:
+                label = str(data.get("label", "")).lower()
+                city = str(data.get("city", "")).lower()
+                phone = str(data.get("phone", "")).lower()
+                if search_lower not in node_id.lower() and search_lower not in label and search_lower not in city and search_lower not in phone:
+                    continue
+                    
+            candidate_ids.add(node_id)
+            
+        # Optional 1-hop neighbor inclusion
+        final_ids = set(candidate_ids)
+        if include_neighbors and len(candidate_ids) < 300:
+            for node_id in candidate_ids:
+                for neighbor in self.graph.neighbors(node_id):
+                    final_ids.add(neighbor)
+                    
+        # Apply limit prioritizing highest risk
+        sorted_nodes = sorted(
+            [self._format_node(nid, self.graph.nodes[nid]) for nid in final_ids if self.graph.has_node(nid)],
+            key=lambda n: n["risk_score"],
+            reverse=True
+        )
+        
+        selected_nodes = sorted_nodes[:limit]
+        selected_ids = {n["id"] for n in selected_nodes}
+        
+        edges = []
+        for u, v, data in self.graph.edges(data=True):
+            if u in selected_ids and v in selected_ids:
+                edges.append({
+                    "from": u,
+                    "to": v,
+                    "relationship": data.get("relationship", "connected"),
+                    "weight": data.get("weight", 1.0),
+                })
+                
+        return selected_nodes, edges
 
     def get_all_edges(self) -> list[dict]:
         """Get all edges in the graph."""
@@ -256,30 +366,25 @@ class SentinelGraph:
                 "relationship": edge_data.get("relationship", "connected"),
             })
         
+        formatted = self._format_node(node_id, data)
         return {
             "id": node_id,
-            "label": data.get("label", node_id),
-            "type": data.get("type", "unknown"),
-            "risk_score": data.get("risk_score", 0),
+            "label": formatted["label"],
+            "type": formatted["type"],
+            "risk_score": formatted["risk_score"],
+            "color": formatted["color"],
+            "size": formatted["size"],
+            "shape": formatted["shape"],
             "connections": connections,
-            "metadata": {k: v for k, v in data.items() 
-                        if k not in ("type", "label", "risk_score")},
+            "metadata": formatted["metadata"],
         }
 
     def get_subgraph(self, node_ids: list[str]) -> tuple[list[dict], list[dict]]:
-        """Get a subgraph containing only the specified nodes and edges between them."""
-        subgraph = self.graph.subgraph(node_ids)
+        """Get a formatted subgraph containing only the specified nodes."""
+        valid_ids = [nid for nid in node_ids if self.graph.has_node(nid)]
+        subgraph = self.graph.subgraph(valid_ids)
         
-        nodes = []
-        for node_id, data in subgraph.nodes(data=True):
-            nodes.append({
-                "id": node_id,
-                "label": data.get("label", node_id),
-                "type": data.get("type", "unknown"),
-                "risk_score": data.get("risk_score", 0),
-                "metadata": {k: v for k, v in data.items() 
-                           if k not in ("type", "label", "risk_score")},
-            })
+        nodes = [self._format_node(nid, self.graph.nodes[nid]) for nid in subgraph.nodes()]
         
         edges = []
         for u, v, data in subgraph.edges(data=True):

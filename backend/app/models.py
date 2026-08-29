@@ -42,6 +42,10 @@ class GraphNode(BaseModel):
     label: str
     type: NodeType
     risk_score: float = Field(ge=0, le=100)
+    color: Optional[str] = None
+    size: Optional[int] = None
+    shape: Optional[str] = None
+    title: Optional[str] = None
     metadata: dict = Field(default_factory=dict)
 
 

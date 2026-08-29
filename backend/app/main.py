@@ -96,28 +96,51 @@ async def health():
 
 @app.get("/api/graph", response_model=GraphResponse)
 async def get_graph(
-    node_type: Optional[str] = Query(None, description="Filter by node type"),
-    min_risk: float = Query(0, description="Minimum risk score filter"),
-    limit: int = Query(2000, description="Max nodes to return"),
+    node_type: Optional[str] = Query(None, description="Single node type filter"),
+    node_types: Optional[str] = Query(None, description="Comma-separated node types to include"),
+    min_risk: float = Query(0, description="Minimum risk score filter (0-100)"),
+    max_risk: float = Query(100, description="Maximum risk score filter (0-100)"),
+    search: Optional[str] = Query(None, description="Search term for labels/IDs/cities"),
+    ring_id: Optional[str] = Query(None, description="Filter for a specific fraud ring ID"),
+    include_neighbors: bool = Query(False, description="Include 1-hop connected neighbors"),
+    limit: int = Query(1500, description="Max nodes to return"),
 ):
     """
-    Get the full entity graph (nodes + edges).
-    Use filters to reduce response size for visualization.
+    Get the entity graph with advanced filtering for vis-network visualization.
+    Returns fully formatted visual nodes (with type-specific colors, scaled sizes, and shapes).
     """
     graph = get_sentinel_graph()
     
-    nodes = graph.get_all_nodes(node_type=node_type, min_risk=min_risk)
-    
-    # Limit nodes for performance
-    if len(nodes) > limit:
-        # Prioritize high-risk nodes
-        nodes.sort(key=lambda n: n["risk_score"], reverse=True)
-        nodes = nodes[:limit]
-    
-    # Get only edges between included nodes
-    included_ids = {n["id"] for n in nodes}
-    all_edges = graph.get_all_edges()
-    edges = [e for e in all_edges if e["from"] in included_ids and e["to"] in included_ids]
+    # Handle single ring request
+    if ring_id:
+        try:
+            from app.fraud_ring_detector import get_detected_rings
+            rings = get_detected_rings()
+            ring = next((r for r in rings if r["ring_id"] == ring_id), None)
+            if ring:
+                nodes, edges = graph.get_subgraph(ring.get("node_ids", []))
+                return GraphResponse(
+                    nodes=[GraphNode(**n) for n in nodes],
+                    edges=[GraphEdge(**e) for e in edges],
+                )
+        except Exception:
+            pass
+            
+    # Parse node_types
+    type_list = None
+    if node_types:
+        type_list = [t.strip() for t in node_types.split(",") if t.strip()]
+    elif node_type:
+        type_list = [node_type.strip()]
+        
+    nodes, edges = graph.get_filtered_graph(
+        node_types=type_list,
+        min_risk=min_risk,
+        max_risk=max_risk,
+        search=search,
+        limit=limit,
+        include_neighbors=include_neighbors
+    )
     
     return GraphResponse(
         nodes=[GraphNode(**n) for n in nodes],

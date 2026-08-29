@@ -78,3 +78,33 @@ def test_continuous_learning_application_injection(initialized_graph):
     assert app_id.startswith("APP_")
     assert initialized_graph.graph.number_of_nodes() > initial_nodes
     assert initialized_graph.graph.has_node(app_id)
+
+
+def test_visual_node_formatting(initialized_graph):
+    """Verify that nodes contain color, shape, size, and tooltip for vis-network."""
+    sample_nodes = initialized_graph.get_all_nodes(min_risk=0)
+    assert len(sample_nodes) > 0
+    
+    first = sample_nodes[0]
+    assert "color" in first
+    assert "size" in first
+    assert "shape" in first
+    assert "title" in first
+    assert first["size"] >= 16
+
+
+def test_filtered_graph_queries(initialized_graph):
+    """Verify that filtered graph queries by type, risk range, and search work."""
+    # Filter by node type
+    nodes_dev, _ = initialized_graph.get_filtered_graph(node_types=["device"], limit=50)
+    for n in nodes_dev:
+        assert n["type"] == "device"
+        
+    # Filter by search
+    nodes_search, _ = initialized_graph.get_filtered_graph(search="Hosur", limit=50)
+    assert len(nodes_search) > 0
+    
+    # Filter by risk range
+    nodes_risk, _ = initialized_graph.get_filtered_graph(min_risk=50, max_risk=100, limit=50)
+    for n in nodes_risk:
+        assert 50 <= n["risk_score"] <= 100
