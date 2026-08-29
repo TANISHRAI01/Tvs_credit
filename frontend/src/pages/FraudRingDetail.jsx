@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -11,12 +11,13 @@ import { getRiskLevel, NODE_COLORS } from '../utils/constants';
 
 // ─── Shared entities breakdown table ─────────────────────────────────────────
 function SharedEntitiesTable({ entities }) {
-  if (!entities || entities.length === 0) return (
-    <p style={{ fontSize: '12px', color: '#334155' }}>No shared entities identified.</p>
+  const list = Array.isArray(entities) ? entities : [];
+  if (list.length === 0) return (
+    <p style={{ fontSize: '12px', color: '#64748b', padding: '8px 0' }}>No shared entities identified.</p>
   );
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      {entities.slice(0, 20).map((ent, i) => {
+      {list.slice(0, 20).map((ent, i) => {
         const color = NODE_COLORS[ent.type] ?? '#94a3b8';
         return (
           <div key={ent.id ?? i} style={{
@@ -64,9 +65,10 @@ function RiskGauge({ score, size = 80 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#1a1e3a" strokeWidth={8} />
-        <circle cx={cx} cy={cy} r={radius} fill="none" stroke={lvl.color} strokeWidth={8}
-          strokeLinecap="round"
+        <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#1e293b" strokeWidth="6" />
+        <circle
+          cx={cx} cy={cy} r={radius} fill="none"
+          stroke={lvl.color} strokeWidth="6"
           strokeDasharray={`${filled} ${circ - filled}`}
           style={{ filter: `drop-shadow(0 0 8px ${lvl.color}90)` }}
         />
@@ -102,7 +104,36 @@ export default function FraudRingDetail() {
   const ring   = data?.ring ?? data ?? null;
   const nodes  = useMemo(() => data?.nodes ?? ring?.nodes ?? [], [data, ring]);
   const edges  = useMemo(() => data?.edges ?? ring?.edges ?? [], [data, ring]);
-  const shared = useMemo(() => data?.shared_entities ?? [], [data]);
+  
+  const shared = useMemo(() => {
+    if (!data?.shared_entities) return [];
+    if (Array.isArray(data.shared_entities)) return data.shared_entities;
+    
+    // Normalize object of arrays { shared_devices: [...], ... }
+    const items = [];
+    const nodeMap = new Map((nodes ?? []).map((n) => [n.id, n]));
+    
+    Object.entries(data.shared_entities).forEach(([key, list]) => {
+      if (Array.isArray(list)) {
+        const rawType = key.replace('shared_', '').replace(/s$/, '');
+        list.forEach((item) => {
+          if (typeof item === 'string') {
+            const matched = nodeMap.get(item);
+            items.push({
+              id: item,
+              label: matched?.label ?? item,
+              type: matched?.type ?? rawType,
+              risk_score: matched?.risk_score ?? 75,
+              shared_count: 2,
+            });
+          } else if (item && typeof item === 'object') {
+            items.push(item);
+          }
+        });
+      }
+    });
+    return items;
+  }, [data, nodes]);
 
   // Entity breakdown from nodes
   const breakdown = useMemo(() => {
