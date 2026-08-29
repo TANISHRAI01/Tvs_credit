@@ -7,255 +7,94 @@ import {
   TrendingUp,
   Activity,
   Zap,
-  PlusCircle,
-  FileSpreadsheet,
   Settings,
-  HelpCircle,
+  User,
 } from 'lucide-react';
 
-const NAV_ITEMS = [
-  {
-    path: '/',
-    label: 'Command Center',
-    icon: LayoutDashboard,
-    exact: true,
-  },
-  {
-    path: '/network',
-    label: 'Network Explorer',
-    icon: Network,
-  },
-  {
-    path: '/fraud-rings',
-    label: 'Fraud Rings',
-    icon: ShieldAlert,
-    badge: '40',
-  },
-  {
-    path: '/ecosystems',
-    label: 'Emerging Threats',
-    icon: TrendingUp,
-    badge: '1 Live',
-  },
-];
-
-const P2_NAV_ITEMS = [
-  {
-    path: '/application-risk',
-    label: 'Application Risk',
-    icon: Activity,
-  },
-  {
-    path: '/simulator',
-    label: 'What-If Simulator',
-    icon: Zap,
-  },
+const NAV = [
+  { path: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { path: '/network', icon: Network, label: 'Network' },
+  { path: '/fraud-rings', icon: ShieldAlert, label: 'Rings' },
+  { path: '/ecosystems', icon: TrendingUp, label: 'Threats' },
+  { path: '/application-risk', icon: Activity, label: 'Risk' },
+  { path: '/simulator', icon: Zap, label: 'Simulate' },
 ];
 
 export default function Sidebar() {
   const location = useLocation();
 
   return (
-    <aside
-      style={{
-        width: '260px',
-        minWidth: '260px',
-        height: '100vh',
-        background: 'linear-gradient(180deg, #0e1233 0%, #080a1c 100%)',
-        borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 18px',
-        overflowY: 'auto',
-        position: 'relative',
-        zIndex: 30,
-      }}
-    >
-      {/* ── Brand Logo ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingLeft: '6px' }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, #e11d48 0%, #7928ca 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(225, 29, 72, 0.35)',
-        }}>
-          <ShieldAlert size={22} color="#ffffff" strokeWidth={2.5} />
-        </div>
-        <div>
-          <div style={{
-            fontSize: '17px',
-            fontWeight: 900,
-            letterSpacing: '-0.4px',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}>
-            TVS <span style={{ color: '#e11d48' }}>SENTINEL</span>
-          </div>
-          <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, letterSpacing: '0.8px' }}>
-            SWARM FRAUD AI
-          </div>
-        </div>
+    <aside style={{
+      width: '68px',
+      minWidth: '68px',
+      height: '100vh',
+      background: '#0a0a0a',
+      borderRight: '1px solid rgba(255,255,255,0.06)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      paddingTop: '20px',
+      paddingBottom: '20px',
+      zIndex: 30,
+    }}>
+      {/* Logo */}
+      <div style={{
+        width: '38px', height: '38px', borderRadius: '12px',
+        background: 'linear-gradient(135deg, #e11d48, #9f1239)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        marginBottom: '32px',
+        boxShadow: '0 4px 16px rgba(225,29,72,0.35)',
+      }}>
+        <ShieldAlert size={20} color="#fff" strokeWidth={2.5} />
       </div>
 
-      {/* ── Primary Action Button (Reference red action button) ── */}
-      <NavLink
-        to="/simulator"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
-          color: '#ffffff',
-          padding: '12px 18px',
-          borderRadius: '16px',
-          textDecoration: 'none',
-          fontWeight: 700,
-          fontSize: '13px',
-          boxShadow: '0 8px 24px rgba(225, 29, 72, 0.45)',
-          marginBottom: '28px',
-          transition: 'all 0.2s ease',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-        }}
-      >
-        <PlusCircle size={16} />
-        <span>+ Run Loan Simulation</span>
-      </NavLink>
-
-      {/* ── Core Navigation ── */}
-      <div style={{ marginBottom: '8px', paddingLeft: '8px' }}>
-        <span style={{
-          fontSize: '10px',
-          fontWeight: 700,
-          letterSpacing: '1px',
-          color: '#475569',
-          textTransform: 'uppercase',
-        }}>
-          Main Menu
-        </span>
-      </div>
-
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '24px' }}>
-        {NAV_ITEMS.map(({ path, label, icon: Icon, exact, badge }) => {
-          const isActive = exact ? location.pathname === path : location.pathname.startsWith(path);
+      {/* Nav Icons */}
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+        {NAV.map(({ path, icon: Icon, label, exact }) => {
+          const active = exact
+            ? location.pathname === path
+            : location.pathname.startsWith(path);
 
           return (
             <NavLink
               key={path}
               to={path}
               end={exact}
+              title={label}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '11px 14px',
-                borderRadius: '14px',
-                fontSize: '13.5px',
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? '#ffffff' : '#94a3b8',
-                background: isActive ? 'rgba(255, 255, 255, 0.09)' : 'transparent',
-                border: isActive ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid transparent',
+                width: '42px', height: '42px',
+                borderRadius: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: active ? 'rgba(225,29,72,0.12)' : 'transparent',
+                border: active ? '1px solid rgba(225,29,72,0.3)' : '1px solid transparent',
+                color: active ? '#e11d48' : '#505050',
                 textDecoration: 'none',
-                transition: 'all 0.18s ease',
+                transition: 'all 0.15s ease',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Icon
-                  size={18}
-                  color={isActive ? '#e11d48' : '#64748b'}
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
-                <span>{label}</span>
-              </div>
-              {badge && (
-                <span style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '2px 8px',
-                  borderRadius: '10px',
-                  background: isActive ? 'rgba(225, 29, 72, 0.2)' : 'rgba(255, 255, 255, 0.06)',
-                  color: isActive ? '#f43f5e' : '#64748b',
-                  border: isActive ? '1px solid rgba(225, 29, 72, 0.4)' : 'none',
-                }}>
-                  {badge}
-                </span>
-              )}
+              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
             </NavLink>
           );
         })}
       </nav>
 
-      {/* ── Intelligence Section ── */}
-      <div style={{ marginBottom: '8px', paddingLeft: '8px' }}>
-        <span style={{
-          fontSize: '10px',
-          fontWeight: 700,
-          letterSpacing: '1px',
-          color: '#475569',
-          textTransform: 'uppercase',
+      {/* Bottom */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+        <div style={{
+          width: '42px', height: '42px', borderRadius: '12px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#505050', cursor: 'pointer',
         }}>
-          AI Intelligence
-        </span>
-      </div>
-
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-        {P2_NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-          const isActive = location.pathname.startsWith(path);
-          return (
-            <NavLink
-              key={path}
-              to={path}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '11px 14px',
-                borderRadius: '14px',
-                fontSize: '13.5px',
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? '#ffffff' : '#94a3b8',
-                background: isActive ? 'rgba(139, 92, 246, 0.12)' : 'transparent',
-                border: isActive ? '1px solid rgba(139, 92, 246, 0.25)' : '1px solid transparent',
-                textDecoration: 'none',
-                transition: 'all 0.18s ease',
-              }}
-            >
-              <Icon
-                size={18}
-                color={isActive ? '#8b5cf6' : '#64748b'}
-                strokeWidth={isActive ? 2.5 : 2}
-              />
-              <span>{label}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
-
-      {/* ── Footer ── */}
-      <div style={{
-        paddingTop: '16px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            background: '#10b981',
-            boxShadow: '0 0 8px #10b981',
-          }} />
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>API v1.0 Live</span>
+          <Settings size={20} strokeWidth={1.8} />
         </div>
-        <span style={{ fontSize: '10px', color: '#475569' }}>TVS Credit E.P.I.C.</span>
+        <div style={{
+          width: '32px', height: '32px', borderRadius: '50%',
+          background: 'linear-gradient(135deg, #e11d48, #7c3aed)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '11px', fontWeight: 800, color: '#fff',
+        }}>
+          TS
+        </div>
       </div>
     </aside>
   );
