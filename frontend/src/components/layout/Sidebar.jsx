@@ -7,6 +7,10 @@ import {
   TrendingUp,
   Activity,
   Zap,
+  PlusCircle,
+  FileSpreadsheet,
+  Settings,
+  HelpCircle,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -25,11 +29,13 @@ const NAV_ITEMS = [
     path: '/fraud-rings',
     label: 'Fraud Rings',
     icon: ShieldAlert,
+    badge: '40',
   },
   {
     path: '/ecosystems',
     label: 'Emerging Threats',
     icon: TrendingUp,
+    badge: '1 Live',
   },
 ];
 
@@ -52,204 +58,204 @@ export default function Sidebar() {
   return (
     <aside
       style={{
-        width: '240px',
-        minWidth: '240px',
+        width: '260px',
+        minWidth: '260px',
         height: '100vh',
-        background: 'linear-gradient(180deg, #0d1130 0%, #0a0e27 100%)',
-        borderRight: '1px solid rgba(255,255,255,0.07)',
+        background: 'linear-gradient(180deg, #0e1233 0%, #080a1c 100%)',
+        borderRight: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex',
         flexDirection: 'column',
-        padding: '0',
+        padding: '24px 18px',
         overflowY: 'auto',
         position: 'relative',
-        zIndex: 10,
+        zIndex: 30,
       }}
     >
-      {/* ── Logo ─────────────────────────────────────────── */}
-      <div
-        style={{
-          padding: '24px 20px 20px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Sentinel Shield Icon */}
-          <div
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #00d4ff, #8b5cf6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              boxShadow: '0 0 16px rgba(0,212,255,0.3)',
-            }}
-          >
-            <ShieldAlert size={18} color="#fff" strokeWidth={2.5} />
+      {/* ── Brand Logo ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingLeft: '6px' }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #e11d48 0%, #7928ca 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(225, 29, 72, 0.35)',
+        }}>
+          <ShieldAlert size={22} color="#ffffff" strokeWidth={2.5} />
+        </div>
+        <div>
+          <div style={{
+            fontSize: '17px',
+            fontWeight: 900,
+            letterSpacing: '-0.4px',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}>
+            TVS <span style={{ color: '#e11d48' }}>SENTINEL</span>
           </div>
-          <div>
-            <div
-              style={{
-                fontSize: '15px',
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #00d4ff, #8b5cf6)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                letterSpacing: '-0.3px',
-              }}
-            >
-              TVS Sentinel
-            </div>
-            <div style={{ fontSize: '10px', color: '#64748b', marginTop: '1px', letterSpacing: '0.5px' }}>
-              FRAUD INTELLIGENCE
-            </div>
+          <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, letterSpacing: '0.8px' }}>
+            SWARM FRAUD AI
           </div>
         </div>
       </div>
 
-      {/* ── Primary Nav ──────────────────────────────────── */}
-      <nav style={{ flex: 1, padding: '16px 12px' }}>
-        <div style={{ marginBottom: '8px' }}>
-          <span
-            style={{
-              fontSize: '10px',
-              fontWeight: 600,
-              letterSpacing: '1px',
-              color: '#475569',
-              padding: '0 8px',
-              textTransform: 'uppercase',
-            }}
-          >
-            Core
-          </span>
-        </div>
+      {/* ── Primary Action Button (Reference red action button) ── */}
+      <NavLink
+        to="/simulator"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
+          color: '#ffffff',
+          padding: '12px 18px',
+          borderRadius: '16px',
+          textDecoration: 'none',
+          fontWeight: 700,
+          fontSize: '13px',
+          boxShadow: '0 8px 24px rgba(225, 29, 72, 0.45)',
+          marginBottom: '28px',
+          transition: 'all 0.2s ease',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        }}
+      >
+        <PlusCircle size={16} />
+        <span>+ Run Loan Simulation</span>
+      </NavLink>
 
-        {NAV_ITEMS.map(({ path, label, icon: Icon, exact }) => {
-          const isActive = exact
-            ? location.pathname === path
-            : location.pathname.startsWith(path);
+      {/* ── Core Navigation ── */}
+      <div style={{ marginBottom: '8px', paddingLeft: '8px' }}>
+        <span style={{
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '1px',
+          color: '#475569',
+          textTransform: 'uppercase',
+        }}>
+          Main Menu
+        </span>
+      </div>
+
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '24px' }}>
+        {NAV_ITEMS.map(({ path, label, icon: Icon, exact, badge }) => {
+          const isActive = exact ? location.pathname === path : location.pathname.startsWith(path);
 
           return (
             <NavLink
               key={path}
               to={path}
               end={exact}
-              style={({ isActive: routerActive }) => ({
+              style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
-                padding: '10px 12px',
-                borderRadius: '10px',
-                marginBottom: '2px',
+                justifyContent: 'space-between',
+                padding: '11px 14px',
+                borderRadius: '14px',
                 fontSize: '13.5px',
-                fontWeight: routerActive ? 600 : 400,
-                color: routerActive ? '#e2e8f0' : '#64748b',
-                background: routerActive
-                  ? 'linear-gradient(90deg, rgba(0,212,255,0.12), rgba(139,92,246,0.08))'
-                  : 'transparent',
-                borderLeft: routerActive ? '2px solid #00d4ff' : '2px solid transparent',
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? '#ffffff' : '#94a3b8',
+                background: isActive ? 'rgba(255, 255, 255, 0.09)' : 'transparent',
+                border: isActive ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid transparent',
                 textDecoration: 'none',
                 transition: 'all 0.18s ease',
-                cursor: 'pointer',
-              })}
+              }}
             >
-              {({ isActive: routerActive }) => (
-                <>
-                  <Icon
-                    size={16}
-                    color={routerActive ? '#00d4ff' : '#475569'}
-                    strokeWidth={routerActive ? 2.5 : 2}
-                    style={{ flexShrink: 0 }}
-                  />
-                  {label}
-                </>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Icon
+                  size={18}
+                  color={isActive ? '#e11d48' : '#64748b'}
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
+                <span>{label}</span>
+              </div>
+              {badge && (
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '10px',
+                  background: isActive ? 'rgba(225, 29, 72, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+                  color: isActive ? '#f43f5e' : '#64748b',
+                  border: isActive ? '1px solid rgba(225, 29, 72, 0.4)' : 'none',
+                }}>
+                  {badge}
+                </span>
               )}
             </NavLink>
           );
         })}
-
-        {/* ── P2 Section ─────────────────────────────────── */}
-        <div style={{ margin: '20px 0 8px' }}>
-          <span
-            style={{
-              fontSize: '10px',
-              fontWeight: 600,
-              letterSpacing: '1px',
-              color: '#475569',
-              padding: '0 8px',
-              textTransform: 'uppercase',
-            }}
-          >
-            Intelligence
-          </span>
-        </div>
-
-        {P2_NAV_ITEMS.map(({ path, label, icon: Icon }) => (
-          <NavLink
-            key={path}
-            to={path}
-            style={({ isActive: routerActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 12px',
-              borderRadius: '10px',
-              marginBottom: '2px',
-              fontSize: '13.5px',
-              fontWeight: routerActive ? 600 : 400,
-              color: routerActive ? '#e2e8f0' : '#64748b',
-              background: routerActive
-                ? 'linear-gradient(90deg, rgba(139,92,246,0.15), rgba(0,212,255,0.06))'
-                : 'transparent',
-              borderLeft: routerActive ? '2px solid #8b5cf6' : '2px solid transparent',
-              textDecoration: 'none',
-              transition: 'all 0.18s ease',
-              cursor: 'pointer',
-            })}
-          >
-            {({ isActive: routerActive }) => (
-              <>
-                <Icon
-                  size={16}
-                  color={routerActive ? '#8b5cf6' : '#475569'}
-                  strokeWidth={routerActive ? 2.5 : 2}
-                  style={{ flexShrink: 0 }}
-                />
-                {label}
-              </>
-            )}
-          </NavLink>
-        ))}
       </nav>
 
-      {/* ── Footer Status ────────────────────────────────── */}
-      <div
-        style={{
-          padding: '16px 20px',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
+      {/* ── Intelligence Section ── */}
+      <div style={{ marginBottom: '8px', paddingLeft: '8px' }}>
+        <span style={{
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '1px',
+          color: '#475569',
+          textTransform: 'uppercase',
+        }}>
+          AI Intelligence
+        </span>
+      </div>
+
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+        {P2_NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+          const isActive = location.pathname.startsWith(path);
+          return (
+            <NavLink
+              key={path}
+              to={path}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '11px 14px',
+                borderRadius: '14px',
+                fontSize: '13.5px',
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? '#ffffff' : '#94a3b8',
+                background: isActive ? 'rgba(139, 92, 246, 0.12)' : 'transparent',
+                border: isActive ? '1px solid rgba(139, 92, 246, 0.25)' : '1px solid transparent',
+                textDecoration: 'none',
+                transition: 'all 0.18s ease',
+              }}
+            >
+              <Icon
+                size={18}
+                color={isActive ? '#8b5cf6' : '#64748b'}
+                strokeWidth={isActive ? 2.5 : 2}
+              />
+              <span>{label}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* ── Footer ── */}
+      <div style={{
+        paddingTop: '16px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div
-            style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              background: '#10b981',
-              boxShadow: '0 0 6px rgba(16,185,129,0.7)',
-              animation: 'pulse-ring 2s ease-in-out infinite',
-            }}
-          />
-          <span style={{ fontSize: '11px', color: '#475569' }}>
-            API Connected · Port 8000
-          </span>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: '#10b981',
+            boxShadow: '0 0 8px #10b981',
+          }} />
+          <span style={{ fontSize: '11px', color: '#94a3b8' }}>API v1.0 Live</span>
         </div>
-        <div style={{ marginTop: '6px', fontSize: '10px', color: '#334155' }}>
-          TVS Credit E.P.I.C. · Team Sentinel
-        </div>
+        <span style={{ fontSize: '10px', color: '#475569' }}>TVS Credit E.P.I.C.</span>
       </div>
     </aside>
   );
