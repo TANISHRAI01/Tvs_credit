@@ -2,7 +2,7 @@
 
 > **AI-Powered Digital Twin for Predictive Fraud Ecosystems**  
 > TVS Credit E.P.I.C. IT Case Study — Problem Statement E (Swarm Intelligence Lending Network)  
-> **Last Updated:** August 29, 2026 · 23:03 IST
+> **Last Updated:** August 29, 2026 · 23:26 IST
 
 ---
 
@@ -32,7 +32,8 @@
 - [x] **Emerging Ecosystem Detector** (`app/emerging_ecosystem.py`) — Temporal velocity analysis identifying networks in `forming`, `growing`, or `established` stages with risk trajectories over time.
 - [x] **Continuous Learning Module** (`POST /api/applications`) — Dynamic injection of new loan applications into the live graph with real-time risk assessment and fraud ring connection alerts.
 - [x] **Phase 3 Graph API Visual Optimization** (`GET /api/graph`) — Added vis-network visual styling (node colors by entity type, risk-scaled sizes 16px–30px, shapes, rich HTML tooltips) and advanced multi-parameter filtering (`node_types`, `min_risk`, `max_risk`, `search`, `ring_id`, `include_neighbors`).
-- [x] **Automated Test Suite** (`tests/test_fraud_detection.py`) — Pytest suite covering graph integrity, community detection, anomaly scoring, filtered queries, visual styling, and dynamic updates (**7/7 tests passing in 3.7s**).
+- [x] **Automated Test Suite** (`tests/test_fraud_detection.py`) — Pytest suite covering graph integrity, community detection, anomaly scoring, filtered queries, visual styling, and dynamic updates (**7/7 tests passing in 3.2s**).
+- [x] **Live API Verification** — Tested all multi-node filtering, risk threshold filtering, Hosur search queries, and isolated ring subgraph queries (all returning 200 OK).
 
 ### 🟩 Frontend (Member 2) — Phase 1 & Phase 2 Complete
 - [x] **Vite 6 + React 19 Project Setup** (`frontend/`) with Tailwind CSS v4 and Lucide icons.
