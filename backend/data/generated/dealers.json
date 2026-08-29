@@ -1,0 +1,402 @@
+[
+  {
+    "id": "DLR_00001",
+    "name": "Sharma Motors",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "lat": 25.31264367080865,
+    "lng": 82.97111227626635,
+    "total_applications": 128,
+    "default_rate": 0.027
+  },
+  {
+    "id": "DLR_00002",
+    "name": "Patel Auto World",
+    "city": "Bhopal",
+    "state": "Madhya Pradesh",
+    "lat": 23.260660080804133,
+    "lng": 77.42132725069004,
+    "total_applications": 131,
+    "default_rate": 0.076
+  },
+  {
+    "id": "DLR_00003",
+    "name": "Singh Wheels",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "lat": 13.071067777872981,
+    "lng": 80.28492184295239,
+    "total_applications": 127,
+    "default_rate": 0.028
+  },
+  {
+    "id": "DLR_00004",
+    "name": "Gupta Two Wheelers",
+    "city": "Mysuru",
+    "state": "Karnataka",
+    "lat": 12.29407066325435,
+    "lng": 76.63025366459658,
+    "total_applications": 109,
+    "default_rate": 0.046
+  },
+  {
+    "id": "DLR_00005",
+    "name": "Reddy Motors",
+    "city": "Akola",
+    "state": "Maharashtra",
+    "lat": 20.71229022576136,
+    "lng": 77.00527487507291,
+    "total_applications": 121,
+    "default_rate": 0.025
+  },
+  {
+    "id": "DLR_00006",
+    "name": "Kumar Automobiles",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "lat": 26.906231368581576,
+    "lng": 75.7934031492926,
+    "total_applications": 118,
+    "default_rate": 0.024
+  },
+  {
+    "id": "DLR_00007",
+    "name": "Verma Auto",
+    "city": "Visakhapatnam",
+    "state": "Andhra Pradesh",
+    "lat": 17.68169268292088,
+    "lng": 83.21434742041744,
+    "total_applications": 123,
+    "default_rate": 0.064
+  },
+  {
+    "id": "DLR_00008",
+    "name": "Jain Motor Works",
+    "city": "Indore",
+    "state": "Madhya Pradesh",
+    "lat": 22.719378109911112,
+    "lng": 75.86285303047958,
+    "total_applications": 145,
+    "default_rate": 0.03
+  },
+  {
+    "id": "DLR_00009",
+    "name": "Thakur Vehicles",
+    "city": "Belgaum",
+    "state": "Karnataka",
+    "lat": 15.836441744562933,
+    "lng": 74.4816354460539,
+    "total_applications": 135,
+    "default_rate": 0.033
+  },
+  {
+    "id": "DLR_00010",
+    "name": "Chauhan Motors",
+    "city": "Bareilly",
+    "state": "Uttar Pradesh",
+    "lat": 28.371786544141685,
+    "lng": 79.42910000797696,
+    "total_applications": 131,
+    "default_rate": 0.051
+  },
+  {
+    "id": "DLR_00011",
+    "name": "Rao Auto Center",
+    "city": "Agra",
+    "state": "Uttar Pradesh",
+    "lat": 27.16410691622897,
+    "lng": 78.0023573005604,
+    "total_applications": 111,
+    "default_rate": 0.062
+  },
+  {
+    "id": "DLR_00012",
+    "name": "Mishra Bikes",
+    "city": "Jodhpur",
+    "state": "Rajasthan",
+    "lat": 26.232590572302815,
+    "lng": 73.02715797779204,
+    "total_applications": 146,
+    "default_rate": 0.072
+  },
+  {
+    "id": "DLR_00013",
+    "name": "Agarwal Motors",
+    "city": "Thanjavur",
+    "state": "Tamil Nadu",
+    "lat": 10.802281678073175,
+    "lng": 79.13564549231806,
+    "total_applications": 113,
+    "default_rate": 0.035
+  },
+  {
+    "id": "DLR_00014",
+    "name": "Pillai Auto",
+    "city": "Ranchi",
+    "state": "Jharkhand",
+    "lat": 23.344472565272802,
+    "lng": 85.30467234209287,
+    "total_applications": 136,
+    "default_rate": 0.068
+  },
+  {
+    "id": "DLR_00015",
+    "name": "Das Motor Hub",
+    "city": "Solapur",
+    "state": "Maharashtra",
+    "lat": 17.644921189529228,
+    "lng": 75.90336417964477,
+    "total_applications": 124,
+    "default_rate": 0.059
+  },
+  {
+    "id": "DLR_00016",
+    "name": "Patil Two Wheelers",
+    "city": "Surat",
+    "state": "Gujarat",
+    "lat": 21.159063288118762,
+    "lng": 72.83869260150402,
+    "total_applications": 137,
+    "default_rate": 0.032
+  },
+  {
+    "id": "DLR_00017",
+    "name": "Kapoor Auto Zone",
+    "city": "Hosur",
+    "state": "Tamil Nadu",
+    "lat": 12.7230654146381,
+    "lng": 77.83189296141175,
+    "total_applications": 132,
+    "default_rate": 0.025
+  },
+  {
+    "id": "DLR_00018",
+    "name": "Mehta Motors",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "lat": 22.590602818193325,
+    "lng": 88.3604887980136,
+    "total_applications": 134,
+    "default_rate": 0.072
+  },
+  {
+    "id": "DLR_00019",
+    "name": "Rajput Wheels",
+    "city": "Gorakhpur",
+    "state": "Uttar Pradesh",
+    "lat": 26.753699703692487,
+    "lng": 83.38329534379626,
+    "total_applications": 103,
+    "default_rate": 0.041
+  },
+  {
+    "id": "DLR_00020",
+    "name": "Nair Auto World",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "lat": 21.149219802400275,
+    "lng": 79.10500983505526,
+    "total_applications": 118,
+    "default_rate": 0.068
+  },
+  {
+    "id": "DLR_00021",
+    "name": "TVS Authorized - Central",
+    "city": "Salem",
+    "state": "Tamil Nadu",
+    "lat": 11.670619145145452,
+    "lng": 78.14685491973619,
+    "total_applications": 107,
+    "default_rate": 0.04
+  },
+  {
+    "id": "DLR_00022",
+    "name": "TVS Authorized - East",
+    "city": "Jodhpur",
+    "state": "Rajasthan",
+    "lat": 26.22313866532055,
+    "lng": 73.0145467702562,
+    "total_applications": 134,
+    "default_rate": 0.045
+  },
+  {
+    "id": "DLR_00023",
+    "name": "TVS Authorized - West",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "lat": 13.086269598297399,
+    "lng": 80.27924059285573,
+    "total_applications": 123,
+    "default_rate": 0.062
+  },
+  {
+    "id": "DLR_00024",
+    "name": "TVS Authorized - South",
+    "city": "Belgaum",
+    "state": "Karnataka",
+    "lat": 15.842341013290069,
+    "lng": 74.50477922261592,
+    "total_applications": 121,
+    "default_rate": 0.037
+  },
+  {
+    "id": "DLR_00025",
+    "name": "TVS Authorized - North",
+    "city": "Vellore",
+    "state": "Tamil Nadu",
+    "lat": 12.919215491534583,
+    "lng": 79.14003232724453,
+    "total_applications": 125,
+    "default_rate": 0.066
+  },
+  {
+    "id": "DLR_00026",
+    "name": "Royal Auto Hub",
+    "city": "Agra",
+    "state": "Uttar Pradesh",
+    "lat": 27.192494908696215,
+    "lng": 77.99140601900584,
+    "total_applications": 132,
+    "default_rate": 0.074
+  },
+  {
+    "id": "DLR_00027",
+    "name": "Speed Motors",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "lat": 22.562532347309258,
+    "lng": 88.37942696889377,
+    "total_applications": 129,
+    "default_rate": 0.041
+  },
+  {
+    "id": "DLR_00028",
+    "name": "City Auto Center",
+    "city": "Agra",
+    "state": "Uttar Pradesh",
+    "lat": 27.184888411484117,
+    "lng": 78.02715176358049,
+    "total_applications": 111,
+    "default_rate": 0.022
+  },
+  {
+    "id": "DLR_00029",
+    "name": "Highway Motors",
+    "city": "Hosur",
+    "state": "Tamil Nadu",
+    "lat": 12.734504470241856,
+    "lng": 77.82757504390091,
+    "total_applications": 134,
+    "default_rate": 0.039
+  },
+  {
+    "id": "DLR_00030",
+    "name": "Golden Wheels",
+    "city": "Lucknow",
+    "state": "Uttar Pradesh",
+    "lat": 26.848009833143344,
+    "lng": 80.96408296095154,
+    "total_applications": 122,
+    "default_rate": 0.05
+  },
+  {
+    "id": "DLR_00031",
+    "name": "Star Auto World",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "lat": 12.96336950606781,
+    "lng": 77.61193907427132,
+    "total_applications": 127,
+    "default_rate": 0.042
+  },
+  {
+    "id": "DLR_00032",
+    "name": "Diamond Motors",
+    "city": "Jodhpur",
+    "state": "Rajasthan",
+    "lat": 26.245670981730488,
+    "lng": 73.02946475431047,
+    "total_applications": 115,
+    "default_rate": 0.048
+  },
+  {
+    "id": "DLR_00033",
+    "name": "Silver Auto Zone",
+    "city": "Delhi",
+    "state": "Delhi",
+    "lat": 28.692042398800904,
+    "lng": 77.09205950388936,
+    "total_applications": 117,
+    "default_rate": 0.048
+  },
+  {
+    "id": "DLR_00034",
+    "name": "Platinum Bikes",
+    "city": "Mysuru",
+    "state": "Karnataka",
+    "lat": 12.31235680842802,
+    "lng": 76.65099519181679,
+    "total_applications": 115,
+    "default_rate": 0.034
+  },
+  {
+    "id": "DLR_00035",
+    "name": "Metro Motor Hub",
+    "city": "Vellore",
+    "state": "Tamil Nadu",
+    "lat": 12.927574149419245,
+    "lng": 79.13835602977322,
+    "total_applications": 118,
+    "default_rate": 0.046
+  },
+  {
+    "id": "DLR_00036",
+    "name": "Urban Wheels",
+    "city": "Aligarh",
+    "state": "Uttar Pradesh",
+    "lat": 27.880540070688866,
+    "lng": 78.0610767299733,
+    "total_applications": 137,
+    "default_rate": 0.059
+  },
+  {
+    "id": "DLR_00037",
+    "name": "Rural Auto Center",
+    "city": "Akola",
+    "state": "Maharashtra",
+    "lat": 20.688126359818945,
+    "lng": 77.01015972258317,
+    "total_applications": 131,
+    "default_rate": 0.041
+  },
+  {
+    "id": "DLR_00038",
+    "name": "Village Motors",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "lat": 23.026858357265837,
+    "lng": 72.5623178193638,
+    "total_applications": 135,
+    "default_rate": 0.049
+  },
+  {
+    "id": "DLR_00039",
+    "name": "Town Auto Works",
+    "city": "Bhopal",
+    "state": "Madhya Pradesh",
+    "lat": 23.250219608172955,
+    "lng": 77.42418983841185,
+    "total_applications": 132,
+    "default_rate": 0.026
+  },
+  {
+    "id": "DLR_00040",
+    "name": "District Motor Hub",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "lat": 12.96187784323643,
+    "lng": 77.60248569802654,
+    "total_applications": 113,
+    "default_rate": 0.024
+  }
+]

@@ -1,0 +1,443 @@
+"""
+TVS Sentinel — Graph Engine
+Builds the Digital Twin: a NetworkX graph connecting all lending entities.
+
+Nodes: Customers, Devices, Dealers, Bank Accounts, Mobiles, Locations, Guarantors, Loan Applications
+Edges: Relationships between entities (customer→device, customer→guarantor, etc.)
+"""
+
+import json
+import networkx as nx
+from pathlib import Path
+from collections import defaultdict
+
+DATA_DIR = Path(__file__).parent.parent / "data" / "generated"
+
+
+class SentinelGraph:
+    """
+    The Digital Twin of the lending ecosystem.
+    A heterogeneous graph where nodes are entities and edges are relationships.
+    """
+
+    def __init__(self):
+        self.graph: nx.Graph = nx.Graph()
+        self._applications: list[dict] = []
+        self._customers: list[dict] = []
+        self._dealers: list[dict] = []
+        self._guarantors: list[dict] = []
+        self._devices: list[dict] = []
+
+    def load_data(self):
+        """Load synthetic data from JSON files."""
+        self._applications = self._load_json("applications.json")
+        self._customers = self._load_json("customers.json")
+        self._dealers = self._load_json("dealers.json")
+        self._guarantors = self._load_json("guarantors.json")
+        self._devices = self._load_json("devices.json")
+        print(f"📥 Loaded: {len(self._applications)} applications, "
+              f"{len(self._customers)} customers, {len(self._dealers)} dealers")
+
+    def build_graph(self):
+        """Construct the full entity graph from loaded data."""
+        print("🔨 Building Digital Twin graph...")
+
+        # Track unique entities to avoid duplicate nodes
+        seen_phones = set()
+        seen_locations = set()
+        seen_bank_accounts = set()
+        seen_devices = set()
+
+        for app in self._applications:
+            app_id = app["id"]
+            cust_id = app["customer_id"]
+            dealer_id = app["dealer_id"]
+            guarantor_id = app["guarantor_id"]
+            device_fp = app["device_fingerprint"]
+            phone = app["phone"]
+            location = app["location"]
+            bank_account = app["bank_account"]
+
+            # ── Add Nodes ──
+
+            # Loan Application node
+            self.graph.add_node(app_id, **{
+                "type": "loan_application",
+                "label": app_id,
+                "loan_type": app.get("loan_type", ""),
+                "loan_amount": app.get("loan_amount", 0),
+                "status": app.get("status", ""),
+                "payment_status": app.get("payment_status", ""),
+                "submitted_at": app.get("submitted_at", ""),
+                "risk_score": 0,  # will be computed later
+            })
+
+            # Customer node
+            if not self.graph.has_node(cust_id):
+                cust_data = self._find_customer(cust_id)
+                self.graph.add_node(cust_id, **{
+                    "type": "customer",
+                    "label": cust_data.get("name", cust_id) if cust_data else cust_id,
+                    "city": cust_data.get("city", "") if cust_data else "",
+                    "state": cust_data.get("state", "") if cust_data else "",
+                    "risk_score": 0,
+                })
+
+            # Device node
+            dev_node_id = f"DEV_{device_fp[:12]}"
+            if dev_node_id not in seen_devices:
+                seen_devices.add(dev_node_id)
+                self.graph.add_node(dev_node_id, **{
+                    "type": "device",
+                    "label": f"Device ...{device_fp[:8]}",
+                    "fingerprint": device_fp,
+                    "risk_score": 0,
+                })
+
+            # Dealer node
+            if not self.graph.has_node(dealer_id):
+                dealer_data = self._find_dealer(dealer_id)
+                self.graph.add_node(dealer_id, **{
+                    "type": "dealer",
+                    "label": dealer_data.get("name", dealer_id) if dealer_data else dealer_id,
+                    "city": dealer_data.get("city", "") if dealer_data else "",
+                    "risk_score": 0,
+                })
+
+            # Guarantor node
+            if not self.graph.has_node(guarantor_id):
+                guar_data = self._find_guarantor(guarantor_id)
+                self.graph.add_node(guarantor_id, **{
+                    "type": "guarantor",
+                    "label": guar_data.get("name", guarantor_id) if guar_data else guarantor_id,
+                    "risk_score": 0,
+                })
+
+            # Mobile node
+            mob_node_id = f"MOB_{phone}"
+            if mob_node_id not in seen_phones:
+                seen_phones.add(mob_node_id)
+                self.graph.add_node(mob_node_id, **{
+                    "type": "mobile",
+                    "label": f"📱 {phone[:5]}...{phone[-4:]}",
+                    "phone": phone,
+                    "risk_score": 0,
+                })
+
+            # Location node
+            loc_node_id = f"LOC_{location.replace(' ', '_').replace(',', '')}"
+            if loc_node_id not in seen_locations:
+                seen_locations.add(loc_node_id)
+                self.graph.add_node(loc_node_id, **{
+                    "type": "location",
+                    "label": location,
+                    "lat": app.get("lat", 0),
+                    "lng": app.get("lng", 0),
+                    "risk_score": 0,
+                })
+
+            # Bank Account node
+            bank_node_id = f"BANK_{bank_account.replace('-', '_')}"
+            if bank_node_id not in seen_bank_accounts:
+                seen_bank_accounts.add(bank_node_id)
+                self.graph.add_node(bank_node_id, **{
+                    "type": "bank_account",
+                    "label": bank_account,
+                    "risk_score": 0,
+                })
+
+            # ── Add Edges (Relationships) ──
+
+            # Customer → applied for → Loan Application
+            self.graph.add_edge(cust_id, app_id, relationship="applied_for", weight=1.0)
+
+            # Customer → uses → Device
+            self.graph.add_edge(cust_id, dev_node_id, relationship="uses_device", weight=1.0)
+
+            # Customer → owns → Mobile
+            self.graph.add_edge(cust_id, mob_node_id, relationship="owns_mobile", weight=1.0)
+
+            # Customer → applied through → Dealer
+            self.graph.add_edge(cust_id, dealer_id, relationship="applied_through", weight=1.0)
+
+            # Customer → uses → Bank Account
+            self.graph.add_edge(cust_id, bank_node_id, relationship="uses_bank_account", weight=1.0)
+
+            # Customer → located at → Location
+            self.graph.add_edge(cust_id, loc_node_id, relationship="located_at", weight=1.0)
+
+            # Customer → connected to → Guarantor
+            self.graph.add_edge(cust_id, guarantor_id, relationship="guaranteed_by", weight=1.0)
+
+            # Application → through → Dealer (direct link)
+            self.graph.add_edge(app_id, dealer_id, relationship="processed_by", weight=0.8)
+
+        print(f"✅ Graph built: {self.graph.number_of_nodes()} nodes, "
+              f"{self.graph.number_of_edges()} edges")
+        
+        self._print_node_type_summary()
+
+    def _print_node_type_summary(self):
+        """Print a summary of node types in the graph."""
+        type_counts = defaultdict(int)
+        for _, data in self.graph.nodes(data=True):
+            type_counts[data.get("type", "unknown")] += 1
+        
+        print("\n📊 Node Type Distribution:")
+        for node_type, count in sorted(type_counts.items()):
+            print(f"   {node_type:20s}: {count}")
+
+    def _find_customer(self, cust_id: str) -> dict | None:
+        for c in self._customers:
+            if c["id"] == cust_id:
+                return c
+        return None
+
+    def _find_dealer(self, dealer_id: str) -> dict | None:
+        for d in self._dealers:
+            if d["id"] == dealer_id:
+                return d
+        return None
+
+    def _find_guarantor(self, guar_id: str) -> dict | None:
+        for g in self._guarantors:
+            if g["id"] == guar_id:
+                return g
+        return None
+
+    # ── Query Methods ──
+
+    def get_all_nodes(self, node_type: str | None = None, 
+                      min_risk: float = 0) -> list[dict]:
+        """Get all nodes, optionally filtered by type and minimum risk score."""
+        nodes = []
+        for node_id, data in self.graph.nodes(data=True):
+            if node_type and data.get("type") != node_type:
+                continue
+            if data.get("risk_score", 0) < min_risk:
+                continue
+            nodes.append({
+                "id": node_id,
+                "label": data.get("label", node_id),
+                "type": data.get("type", "unknown"),
+                "risk_score": data.get("risk_score", 0),
+                "metadata": {k: v for k, v in data.items() 
+                           if k not in ("type", "label", "risk_score")},
+            })
+        return nodes
+
+    def get_all_edges(self) -> list[dict]:
+        """Get all edges in the graph."""
+        edges = []
+        for u, v, data in self.graph.edges(data=True):
+            edges.append({
+                "from": u,
+                "to": v,
+                "relationship": data.get("relationship", "connected"),
+                "weight": data.get("weight", 1.0),
+            })
+        return edges
+
+    def get_node_detail(self, node_id: str) -> dict | None:
+        """Get detailed information about a single node and its connections."""
+        if not self.graph.has_node(node_id):
+            return None
+        
+        data = self.graph.nodes[node_id]
+        connections = []
+        
+        for neighbor in self.graph.neighbors(node_id):
+            neighbor_data = self.graph.nodes[neighbor]
+            edge_data = self.graph.edges[node_id, neighbor]
+            connections.append({
+                "id": neighbor,
+                "label": neighbor_data.get("label", neighbor),
+                "type": neighbor_data.get("type", "unknown"),
+                "relationship": edge_data.get("relationship", "connected"),
+            })
+        
+        return {
+            "id": node_id,
+            "label": data.get("label", node_id),
+            "type": data.get("type", "unknown"),
+            "risk_score": data.get("risk_score", 0),
+            "connections": connections,
+            "metadata": {k: v for k, v in data.items() 
+                        if k not in ("type", "label", "risk_score")},
+        }
+
+    def get_subgraph(self, node_ids: list[str]) -> tuple[list[dict], list[dict]]:
+        """Get a subgraph containing only the specified nodes and edges between them."""
+        subgraph = self.graph.subgraph(node_ids)
+        
+        nodes = []
+        for node_id, data in subgraph.nodes(data=True):
+            nodes.append({
+                "id": node_id,
+                "label": data.get("label", node_id),
+                "type": data.get("type", "unknown"),
+                "risk_score": data.get("risk_score", 0),
+                "metadata": {k: v for k, v in data.items() 
+                           if k not in ("type", "label", "risk_score")},
+            })
+        
+        edges = []
+        for u, v, data in subgraph.edges(data=True):
+            edges.append({
+                "from": u,
+                "to": v,
+                "relationship": data.get("relationship", "connected"),
+                "weight": data.get("weight", 1.0),
+            })
+        
+        return nodes, edges
+
+    def add_application(self, app_data: dict) -> str:
+        """
+        Add a new loan application to the graph (continuous learning).
+        Returns the new application ID.
+        """
+        # Generate new application ID
+        existing_apps = [n for n, d in self.graph.nodes(data=True) 
+                        if d.get("type") == "loan_application"]
+        new_id = f"APP_{str(len(existing_apps) + 1).zfill(5)}"
+        
+        # Add all nodes and edges (same logic as build_graph but for one app)
+        app_data["id"] = new_id
+        self._applications.append(app_data)
+        
+        # Add application node
+        self.graph.add_node(new_id, **{
+            "type": "loan_application",
+            "label": new_id,
+            "loan_amount": app_data.get("loan_amount", 0),
+            "status": "pending",
+            "payment_status": "current",
+            "risk_score": 0,
+        })
+        
+        # Add/connect to other entities
+        cust_id = app_data.get("customer_id", f"CUST_NEW_{new_id}")
+        if not self.graph.has_node(cust_id):
+            self.graph.add_node(cust_id, **{
+                "type": "customer",
+                "label": app_data.get("applicant_name", cust_id),
+                "risk_score": 0,
+            })
+        
+        dev_fp = app_data.get("device_fingerprint", "")
+        dev_node_id = f"DEV_{dev_fp[:12]}"
+        if not self.graph.has_node(dev_node_id):
+            self.graph.add_node(dev_node_id, **{
+                "type": "device",
+                "label": f"Device ...{dev_fp[:8]}",
+                "fingerprint": dev_fp,
+                "risk_score": 0,
+            })
+        
+        dealer_id = app_data.get("dealer_id", "")
+        guarantor_id = app_data.get("guarantor_id", "")
+        phone = app_data.get("phone", "")
+        location = app_data.get("location", "")
+        bank_account = app_data.get("bank_account", "")
+        
+        mob_node_id = f"MOB_{phone}"
+        if not self.graph.has_node(mob_node_id):
+            self.graph.add_node(mob_node_id, **{
+                "type": "mobile",
+                "label": f"📱 {phone[:5]}...{phone[-4:]}",
+                "risk_score": 0,
+            })
+        
+        loc_node_id = f"LOC_{location.replace(' ', '_').replace(',', '')}"
+        if not self.graph.has_node(loc_node_id):
+            self.graph.add_node(loc_node_id, **{
+                "type": "location",
+                "label": location,
+                "risk_score": 0,
+            })
+        
+        bank_node_id = f"BANK_{bank_account.replace('-', '_')}"
+        if not self.graph.has_node(bank_node_id):
+            self.graph.add_node(bank_node_id, **{
+                "type": "bank_account",
+                "label": bank_account,
+                "risk_score": 0,
+            })
+        
+        # Add edges
+        self.graph.add_edge(cust_id, new_id, relationship="applied_for", weight=1.0)
+        self.graph.add_edge(cust_id, dev_node_id, relationship="uses_device", weight=1.0)
+        self.graph.add_edge(cust_id, mob_node_id, relationship="owns_mobile", weight=1.0)
+        
+        if self.graph.has_node(dealer_id):
+            self.graph.add_edge(cust_id, dealer_id, relationship="applied_through", weight=1.0)
+            self.graph.add_edge(new_id, dealer_id, relationship="processed_by", weight=0.8)
+        
+        if self.graph.has_node(guarantor_id):
+            self.graph.add_edge(cust_id, guarantor_id, relationship="guaranteed_by", weight=1.0)
+        
+        self.graph.add_edge(cust_id, bank_node_id, relationship="uses_bank_account", weight=1.0)
+        self.graph.add_edge(cust_id, loc_node_id, relationship="located_at", weight=1.0)
+        
+        return new_id
+
+    def get_stats(self) -> dict:
+        """Get summary statistics for the dashboard."""
+        type_counts = defaultdict(int)
+        risk_scores = []
+        high_risk_count = 0
+        
+        for _, data in self.graph.nodes(data=True):
+            node_type = data.get("type", "unknown")
+            type_counts[node_type] += 1
+            risk = data.get("risk_score", 0)
+            risk_scores.append(risk)
+            if risk >= 70:
+                high_risk_count += 1
+        
+        # Count connected components as "networks"
+        components = list(nx.connected_components(self.graph))
+        total_networks = len([c for c in components if len(c) > 2])
+        
+        avg_risk = sum(risk_scores) / len(risk_scores) if risk_scores else 0
+        
+        return {
+            "total_applications": type_counts.get("loan_application", 0),
+            "total_customers": type_counts.get("customer", 0),
+            "total_networks": total_networks,
+            "suspicious_networks": 0,  # will be set by fraud_ring_detector
+            "critical_networks": 0,    # will be set by fraud_ring_detector
+            "high_risk_count": high_risk_count,
+            "avg_risk_score": round(avg_risk, 2),
+        }
+
+    @staticmethod
+    def _load_json(filename: str) -> list:
+        """Load a JSON file from the generated data directory."""
+        filepath = DATA_DIR / filename
+        if not filepath.exists():
+            print(f"⚠️  File not found: {filepath}. Run generate_synthetic_data.py first.")
+            return []
+        with open(filepath, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+
+# ── Singleton instance ──
+_sentinel_graph: SentinelGraph | None = None
+
+
+def get_sentinel_graph() -> SentinelGraph:
+    """Get or create the singleton SentinelGraph instance."""
+    global _sentinel_graph
+    if _sentinel_graph is None:
+        _sentinel_graph = SentinelGraph()
+        _sentinel_graph.load_data()
+        _sentinel_graph.build_graph()
+    return _sentinel_graph
+
+
+def reset_graph():
+    """Reset the graph (useful for testing)."""
+    global _sentinel_graph
+    _sentinel_graph = None

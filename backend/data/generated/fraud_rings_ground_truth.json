@@ -1,0 +1,165 @@
+[
+  {
+    "ring_id": "RING_001",
+    "type": "device_sharing",
+    "description": "8 customers sharing 2 device fingerprints — appears coordinated",
+    "application_ids": [
+      "APP_05001",
+      "APP_05002",
+      "APP_05003",
+      "APP_05004",
+      "APP_05005",
+      "APP_05006",
+      "APP_05007",
+      "APP_05008"
+    ],
+    "shared_devices": [
+      "FRAUD_DEV_ALPHA_01",
+      "FRAUD_DEV_ALPHA_02"
+    ],
+    "risk_score": 87
+  },
+  {
+    "ring_id": "RING_002",
+    "type": "guarantor_ring",
+    "description": "Guarantor 'Vikram Malhotra' backing 7 unrelated applicants across 7 cities",
+    "application_ids": [
+      "APP_05020",
+      "APP_05021",
+      "APP_05022",
+      "APP_05023",
+      "APP_05024",
+      "APP_05025",
+      "APP_05026"
+    ],
+    "shared_guarantor": "GUAR_RING_002",
+    "risk_score": 92
+  },
+  {
+    "ring_id": "RING_003",
+    "type": "location_cluster",
+    "description": "10 applications from same GPS location (~200m radius) with different addresses via same dealer",
+    "application_ids": [
+      "APP_05040",
+      "APP_05041",
+      "APP_05042",
+      "APP_05043",
+      "APP_05044",
+      "APP_05045",
+      "APP_05046",
+      "APP_05047",
+      "APP_05048",
+      "APP_05049"
+    ],
+    "center_location": {
+      "lat": 12.736,
+      "lng": 77.832,
+      "city": "Hosur"
+    },
+    "risk_score": 78
+  },
+  {
+    "ring_id": "RING_004",
+    "type": "dealer_collusion",
+    "description": "Dealer 'Platinum Bikes' processing 12 apps with shared devices and 100% late/default rate",
+    "application_ids": [
+      "APP_05060",
+      "APP_05061",
+      "APP_05062",
+      "APP_05063",
+      "APP_05064",
+      "APP_05065",
+      "APP_05066",
+      "APP_05067",
+      "APP_05068",
+      "APP_05069",
+      "APP_05070",
+      "APP_05071"
+    ],
+    "colluding_dealer": "DLR_00033",
+    "shared_device": "FRAUD_DEV_DEALER_RING",
+    "risk_score": 94
+  },
+  {
+    "ring_id": "RING_005",
+    "type": "temporal_burst",
+    "description": "12 applications over 12 days with gradually emerging connections — shared devices, phone patterns, guarantors",
+    "application_ids": [
+      "APP_05080",
+      "APP_05081",
+      "APP_05082",
+      "APP_05083",
+      "APP_05084",
+      "APP_05085",
+      "APP_05086",
+      "APP_05087",
+      "APP_05088",
+      "APP_05089",
+      "APP_05090",
+      "APP_05091"
+    ],
+    "formation_timeline": [
+      {
+        "day": 1,
+        "event": "First suspicious application",
+        "description": "Application CUST_03080 submitted"
+      },
+      {
+        "day": 2,
+        "event": "Second application",
+        "description": "Unrelated customer, different device"
+      },
+      {
+        "day": 3,
+        "event": "Third application",
+        "description": "New customer, pattern not yet visible"
+      },
+      {
+        "day": 4,
+        "event": "Phone pattern detected",
+        "description": "Shared phone prefix 98765 appears"
+      },
+      {
+        "day": 5,
+        "event": "Device overlap",
+        "description": "Shared device fingerprint first seen"
+      },
+      {
+        "day": 6,
+        "event": "Shared device + phone",
+        "description": "Two connections now visible"
+      },
+      {
+        "day": 7,
+        "event": "Guarantor link",
+        "description": "Same guarantor backing 3rd applicant"
+      },
+      {
+        "day": 8,
+        "event": "Dealer pattern",
+        "description": "Same 2 dealers processing all apps"
+      },
+      {
+        "day": 9,
+        "event": "Network forming",
+        "description": "6 entities now connected"
+      },
+      {
+        "day": 10,
+        "event": "Location cluster",
+        "description": "All recent apps from Chennai/Coimbatore"
+      },
+      {
+        "day": 11,
+        "event": "Risk escalation",
+        "description": "Network risk score crosses threshold"
+      },
+      {
+        "day": 12,
+        "event": "EMERGING FRAUD ECOSYSTEM",
+        "description": "Full network identified with 12 connected applications"
+      }
+    ],
+    "risk_score": 82
+  }
+]
