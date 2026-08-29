@@ -107,7 +107,8 @@ function StatPill({ icon, label, value, color }) {
 export default function FraudRingCard({ ring, index = 0 }) {
   const navigate  = useNavigate();
   const lvl       = getRiskLevel(ring.risk_score ?? 0);
-  const exposure  = ring.exposure_lakhs ?? ring.potential_exposure_lakhs ?? 0;
+  const exposure  = ring.potential_exposure ?? ring.exposure_lakhs ?? ring.potential_exposure_lakhs ?? 0;
+  const edgeCount = ring.edges?.length ?? ring.edge_count ?? 0;
 
   const handleClick = () => navigate(`/fraud-rings/${ring.id}`);
 
@@ -196,7 +197,7 @@ export default function FraudRingCard({ ring, index = 0 }) {
       {/* ── Stats grid row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
         <StatPill icon={<Users size={12} />} label="Nodes" value={ring.node_count ?? 0} color="#818cf8" />
-        <StatPill icon={<Layers size={12} />} label="Edges" value={ring.edge_count ?? 0} color="#38bdf8" />
+        <StatPill icon={<Layers size={12} />} label="Edges" value={edgeCount} color="#38bdf8" />
         <StatPill icon={<IndianRupee size={12} />} label="Exposure" value={`${exposure.toFixed(1)}L`} color="#f59e0b" />
       </div>
 

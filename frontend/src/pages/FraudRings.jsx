@@ -16,6 +16,10 @@ const SORT_OPTIONS = [
   { value: 'exposure_desc', label: 'Highest Exposure' },
 ];
 
+function getExposure(r) {
+  return r.potential_exposure ?? r.exposure_lakhs ?? r.potential_exposure_lakhs ?? 0;
+}
+
 function sortRings(rings, sortBy) {
   const sorted = [...rings];
   switch (sortBy) {
@@ -23,7 +27,7 @@ function sortRings(rings, sortBy) {
     case 'risk_desc':     return sorted.sort((a, b) => (b.risk_score ?? 0) - (a.risk_score ?? 0));
     case 'size_asc':      return sorted.sort((a, b) => (a.node_count ?? 0) - (b.node_count ?? 0));
     case 'size_desc':     return sorted.sort((a, b) => (b.node_count ?? 0) - (a.node_count ?? 0));
-    case 'exposure_desc': return sorted.sort((a, b) => ((b.exposure_lakhs ?? b.potential_exposure_lakhs ?? 0) - (a.exposure_lakhs ?? a.potential_exposure_lakhs ?? 0)));
+    case 'exposure_desc': return sorted.sort((a, b) => getExposure(b) - getExposure(a));
     default:              return sorted;
   }
 }
@@ -55,7 +59,7 @@ export default function FraudRings() {
     total:    rings.length,
     critical: rings.filter((r) => (r.risk_score ?? 0) >= 80).length,
     high:     rings.filter((r) => (r.risk_score ?? 0) >= 50 && (r.risk_score ?? 0) < 80).length,
-    exposure: rings.reduce((s, r) => s + (r.exposure_lakhs ?? r.potential_exposure_lakhs ?? 0), 0),
+    exposure: rings.reduce((s, r) => s + getExposure(r), 0),
   }), [rings]);
 
   // ── Filtered + sorted list ────────────────────────────────────────────────
