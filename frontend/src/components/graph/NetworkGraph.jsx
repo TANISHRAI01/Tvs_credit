@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Network } from 'vis-network/standalone';
 import { NODE_COLORS } from '../../utils/constants';
 
@@ -60,26 +60,30 @@ export default function NetworkGraph({
   // Build vis-network nodes array
   const buildVisNodes = useCallback(
     (rawNodes) =>
-      rawNodes.map((n) => ({
-        id:    n.id,
-        label: showLabels ? (n.label ?? String(n.id ?? '')) : '',
-        title: `<div style="font-family:Inter,sans-serif;font-size:12px;padding:6px 8px;background:#1a1e3a;border:1px solid #2a2e4a;border-radius:8px;color:#e2e8f0;min-width:140px">
-          <b style="color:${NODE_COLORS[n.type] ?? '#94a3b8'}">${n.label ?? n.id}</b><br/>
-          <span style="color:#64748b">Type:</span> ${n.type ?? 'unknown'}<br/>
-          <span style="color:#64748b">Risk:</span> <span style="color:${(n.risk_score ?? 0) >= 70 ? '#ef4444' : '#f59e0b'}">${(n.risk_score ?? 0).toFixed(1)}</span>
-        </div>`,
-        size:  riskToSize(n.risk_score),
-        shape: NODE_SHAPES[n.type] ?? 'dot',
-        color: buildNodeColor(n.type, n.risk_score),
-        font: {
-          color:       '#e2e8f0',
-          size:        10,
-          face:        'Inter, sans-serif',
-          strokeWidth: 2,
-          strokeColor: '#0a0e27',
-        },
-        _data: n,
-      })),
+      rawNodes.map((n) => {
+        // vis-network renders HTML tooltips only when `title` is a DOM element
+        const tip = document.createElement('div');
+        tip.style.cssText = 'font-family:Inter,sans-serif;font-size:12px;padding:8px 12px;background:#111111;border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#f0f0f0;min-width:150px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,0.5)';
+        const riskColor = (n.risk_score ?? 0) >= 70 ? '#e11d48' : (n.risk_score ?? 0) >= 40 ? '#f59e0b' : '#22c55e';
+        tip.innerHTML = `<b style="color:${NODE_COLORS[n.type] ?? '#94a3b8'}">${n.label ?? n.id}</b><br/><span style="color:#606060">Type:</span> ${n.type ?? 'unknown'}<br/><span style="color:#606060">Risk:</span> <span style="color:${riskColor};font-weight:700">${(n.risk_score ?? 0).toFixed(1)}</span>`;
+
+        return {
+          id:    n.id,
+          label: showLabels ? (n.label ?? String(n.id ?? '')) : '',
+          title: tip,
+          size:  riskToSize(n.risk_score),
+          shape: NODE_SHAPES[n.type] ?? 'dot',
+          color: buildNodeColor(n.type, n.risk_score),
+          font: {
+            color:       '#f0f0f0',
+            size:        10,
+            face:        'Inter, sans-serif',
+            strokeWidth: 2,
+            strokeColor: '#080808',
+          },
+          _data: n,
+        };
+      }),
     [showLabels],
   );
 
@@ -93,12 +97,12 @@ export default function NetworkGraph({
         label: e.label ?? '',
         width: e.weight ? Math.max(1, Math.min(e.weight * 2, 5)) : 1,
         color: {
-          color:     'rgba(100,116,139,0.4)',
-          highlight: '#00d4ff',
-          hover:     '#8b5cf6',
+          color:     'rgba(255,255,255,0.08)',
+          highlight: '#e11d48',
+          hover:     '#a78bfa',
         },
         font: {
-          color: '#475569',
+          color: '#404040',
           size:  9,
           face:  'Inter, sans-serif',
           align: 'middle',
