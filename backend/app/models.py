@@ -4,7 +4,7 @@ All request/response schemas matching the shared API contract.
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Union, Any
 from datetime import datetime
 from enum import Enum
 
@@ -42,7 +42,7 @@ class GraphNode(BaseModel):
     label: str
     type: NodeType
     risk_score: float = Field(ge=0, le=100)
-    color: Optional[str] = None
+    color: Optional[Union[str, dict[str, Any]]] = None
     size: Optional[int] = None
     shape: Optional[str] = None
     title: Optional[str] = None
