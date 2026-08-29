@@ -5,10 +5,12 @@ Main entry point with all API routes.
 Run with: uvicorn app.main:app --reload --port 8000
 """
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
+import logging
+from contextlib import asynccontextmanager
 from typing import Optional
 from datetime import datetime
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.graph_engine import get_sentinel_graph
 from app.models import (
@@ -19,55 +21,66 @@ from app.models import (
     ConnectionInfo, ConnectedRingInfo, RelatedEntity,
 )
 
+# ── Structured Logging ──
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger("tvs-sentinel")
+
+
+# ── Modern Lifespan Startup / Shutdown ──
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize Digital Twin graph and intelligence engines on startup."""
+    logger.info("🚀 TVS Sentinel initializing...")
+    graph = get_sentinel_graph()
+    
+    try:
+        from app.fraud_ring_detector import detect_fraud_rings
+        detect_fraud_rings(graph)
+        logger.info("✅ Fraud ring detection complete (Louvain clusters analyzed)")
+    except Exception as e:
+        logger.warning(f"Fraud ring detector initialization notice: {e}")
+    
+    try:
+        from app.anomaly_scorer import compute_risk_scores
+        compute_risk_scores(graph)
+        logger.info("✅ Graph anomaly scoring complete (Isolation Forest calibrated)")
+    except Exception as e:
+        logger.warning(f"Anomaly scorer initialization notice: {e}")
+    
+    try:
+        from app.emerging_ecosystem import detect_emerging_ecosystems
+        detect_emerging_ecosystems(graph)
+        logger.info("✅ Emerging ecosystem tracking complete (Temporal analysis)")
+    except Exception as e:
+        logger.warning(f"Emerging ecosystem initialization notice: {e}")
+    
+    logger.info(f"🟢 TVS Sentinel ready with {graph.graph.number_of_nodes()} entities and {graph.graph.number_of_edges()} relationships!")
+    yield
+    logger.info("🛑 TVS Sentinel shutting down gracefully.")
+
+
 # ── App Setup ──
 
 app = FastAPI(
     title="TVS Sentinel API",
     description="AI-Powered Digital Twin for Predictive Fraud Ecosystems",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS — allow frontend to connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# ── Startup Event ──
-
-@app.on_event("startup")
-async def startup_event():
-    """Load data and build graph on startup."""
-    print("\n🚀 TVS Sentinel starting up...")
-    graph = get_sentinel_graph()
-    
-    # Run fraud detection if available
-    try:
-        from app.fraud_ring_detector import detect_fraud_rings
-        detect_fraud_rings(graph)
-        print("✅ Fraud ring detection complete")
-    except ImportError:
-        print("⚠️  fraud_ring_detector not yet available — skipping")
-    
-    try:
-        from app.anomaly_scorer import compute_risk_scores
-        compute_risk_scores(graph)
-        print("✅ Risk scoring complete")
-    except ImportError:
-        print("⚠️  anomaly_scorer not yet available — skipping")
-    
-    try:
-        from app.emerging_ecosystem import detect_emerging_ecosystems
-        detect_emerging_ecosystems(graph)
-        print("✅ Emerging ecosystem detection complete")
-    except ImportError:
-        print("⚠️  emerging_ecosystem not yet available — skipping")
-    
-    print("🟢 TVS Sentinel is ready!\n")
 
 
 # ── Health Check ──
