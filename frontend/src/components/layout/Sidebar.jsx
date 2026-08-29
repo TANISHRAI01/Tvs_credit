@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
+  Home,
   LayoutDashboard,
   Network,
   ShieldAlert,
@@ -13,7 +14,8 @@ import {
 import TvsLogo from '../common/TvsLogo';
 
 const NAV = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { path: '/', icon: Home, label: 'Home', exact: true },
+  { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/network', icon: Network, label: 'Network' },
   { path: '/fraud-rings', icon: ShieldAlert, label: 'Fraud Rings' },
   { path: '/ecosystems', icon: TrendingUp, label: 'Threats' },
@@ -23,6 +25,7 @@ const NAV = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
 
   const width = hovered ? 220 : 68;
@@ -46,14 +49,18 @@ export default function Sidebar() {
       }}
     >
       {/* Brand Logo */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 4px',
-        marginBottom: '26px',
-        height: '40px',
-        overflow: 'hidden',
-      }}>
+      <div
+        onClick={() => navigate('/')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 4px',
+          marginBottom: '26px',
+          height: '40px',
+          overflow: 'hidden',
+          cursor: 'pointer',
+        }}
+      >
         <TvsLogo size={38} showText={hovered} />
       </div>
 

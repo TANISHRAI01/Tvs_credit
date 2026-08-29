@@ -1,11 +1,12 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import './index.css';
 
 // ─── Lazy-load pages ─────────────────────────────────────────────────────────
+const LandingPage       = lazy(() => import('./pages/LandingPage'));
 const CommandCenter     = lazy(() => import('./pages/CommandCenter'));
 const NetworkExplorer   = lazy(() => import('./pages/NetworkExplorer'));
 const FraudRings        = lazy(() => import('./pages/FraudRings'));
@@ -55,83 +56,95 @@ const PageLoader = () => (
   </div>
 );
 
-// ─── App ──────────────────────────────────────────────────────────────────────
+// ─── App Shell Wrapper for Operational Console ───────────────────────────────
+function DashboardLayout({ children }) {
+  return (
+    <div className="app-shell">
+      <Sidebar />
+      <main className="main-content">
+        <Header />
+        <div className="page-container">
+          <PageWrapper>{children}</PageWrapper>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// ─── Main App Router ─────────────────────────────────────────────────────────
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="app-shell">
-        <Sidebar />
+      <Suspense fallback={<PageLoader />}>
+        <AnimatePresence mode="wait">
+          <Routes>
+            {/* High-Tech Homepage / Landing Page */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/home" element={<LandingPage />} />
 
-        <main className="main-content">
-          <Header />
-          <div className="page-container">
-            <Suspense fallback={<PageLoader />}>
-              <AnimatePresence mode="wait">
-                <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      <PageWrapper>
-                        <CommandCenter />
-                      </PageWrapper>
-                    }
-                  />
-                  <Route
-                    path="/network"
-                    element={
-                      <PageWrapper>
-                        <NetworkExplorer />
-                      </PageWrapper>
-                    }
-                  />
-                  <Route
-                    path="/fraud-rings"
-                    element={
-                      <PageWrapper>
-                        <FraudRings />
-                      </PageWrapper>
-                    }
-                  />
-                  <Route
-                    path="/fraud-rings/:id"
-                    element={
-                      <PageWrapper>
-                        <FraudRingDetail />
-                      </PageWrapper>
-                    }
-                  />
-                  <Route
-                    path="/ecosystems"
-                    element={
-                      <PageWrapper>
-                        <EmergingThreats />
-                      </PageWrapper>
-                    }
-                  />
-                  <Route
-                    path="/application-risk"
-                    element={
-                      <PageWrapper>
-                        <ApplicationRisk />
-                      </PageWrapper>
-                    }
-                  />
-                  <Route
-                    path="/simulator"
-                    element={
-                      <PageWrapper>
-                        <WhatIfSimulator />
-                      </PageWrapper>
-                    }
-                  />
-                  {/* Fallback */}
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </AnimatePresence>
-            </Suspense>
-          </div>
-        </main>
-      </div>
+            {/* Operational Console Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <DashboardLayout>
+                  <CommandCenter />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/network"
+              element={
+                <DashboardLayout>
+                  <NetworkExplorer />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/fraud-rings"
+              element={
+                <DashboardLayout>
+                  <FraudRings />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/fraud-rings/:id"
+              element={
+                <DashboardLayout>
+                  <FraudRingDetail />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/ecosystems"
+              element={
+                <DashboardLayout>
+                  <EmergingThreats />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/application-risk"
+              element={
+                <DashboardLayout>
+                  <ApplicationRisk />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/simulator"
+              element={
+                <DashboardLayout>
+                  <WhatIfSimulator />
+                </DashboardLayout>
+              }
+            />
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AnimatePresence>
+      </Suspense>
     </BrowserRouter>
   );
 }
