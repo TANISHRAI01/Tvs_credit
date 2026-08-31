@@ -34,7 +34,7 @@ def detect_fraud_rings(sentinel_graph, risk_threshold: float = 40.0) -> list[dic
     global _detected_rings
     
     graph = sentinel_graph.graph
-    print("🔍 Running fraud ring detection (Louvain community detection)...")
+    print("[FraudRingDetector] Running fraud ring detection (Louvain community detection)...")
 
     # Step 1: Run Louvain community detection
     partition = community_louvain.best_partition(graph, random_state=42)
@@ -44,7 +44,7 @@ def detect_fraud_rings(sentinel_graph, risk_threshold: float = 40.0) -> list[dic
     for node_id, community_id in partition.items():
         communities[community_id].append(node_id)
     
-    print(f"   Found {len(communities)} total communities")
+    print(f"   [FraudRingDetector] Found {len(communities)} total communities")
 
     # Step 2: Analyze each community for fraud indicators
     fraud_rings = []
@@ -103,11 +103,11 @@ def detect_fraud_rings(sentinel_graph, risk_threshold: float = 40.0) -> list[dic
     
     _detected_rings = fraud_rings
     
-    print(f"   🚨 Detected {len(fraud_rings)} fraud rings (threshold: {risk_threshold})")
+    print(f"   [FraudRingDetector] Detected {len(fraud_rings)} fraud rings (threshold: {risk_threshold})")
     for ring in fraud_rings:
-        print(f"      → {ring['ring_id']}: risk={ring['risk_score']}, "
+        print(f"      -> {ring['ring_id']}: risk={ring['risk_score']}, "
               f"nodes={ring['node_count']}, type={ring['type']}, "
-              f"exposure=₹{ring['potential_exposure']}L")
+              f"exposure=Rs.{ring['potential_exposure']}L")
     
     return fraud_rings
 

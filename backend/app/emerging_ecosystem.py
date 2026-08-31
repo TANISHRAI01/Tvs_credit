@@ -27,7 +27,7 @@ def detect_emerging_ecosystems(sentinel_graph) -> list[dict]:
     global _emerging_ecosystems
     
     graph = sentinel_graph.graph
-    print("⏳ Running Emerging Fraud Ecosystem detection...")
+    print("[EmergingEcosystem] Running Emerging Fraud Ecosystem detection...")
     
     # Check for planted emerging scenarios (e.g. Ring 5 or clusters with rapid growth)
     try:
@@ -106,7 +106,7 @@ def detect_emerging_ecosystems(sentinel_graph) -> list[dict]:
                     })
     
     _emerging_ecosystems = ecosystems
-    print(f"   🚨 Identified {len(ecosystems)} emerging fraud ecosystems")
+    print(f"   [EmergingEcosystem] Identified {len(ecosystems)} emerging fraud ecosystems")
     return ecosystems
 
 

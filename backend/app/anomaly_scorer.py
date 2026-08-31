@@ -26,7 +26,7 @@ def compute_risk_scores(sentinel_graph) -> dict[str, float]:
         Dict mapping node_id -> risk_score (0-100)
     """
     graph = sentinel_graph.graph
-    print("🧠 Computing entity risk scores via Graph Anomaly Detection...")
+    print("[AnomalyScorer] Computing entity risk scores via Graph Anomaly Detection...")
     
     nodes = list(graph.nodes())
     if not nodes:
@@ -109,5 +109,5 @@ def compute_risk_scores(sentinel_graph) -> dict[str, float]:
         graph.nodes[node_id]["risk_score"] = final_risk
         risk_dict[node_id] = final_risk
         
-    print(f"   ✅ Computed risk scores for {len(risk_dict)} nodes (Avg: {np.mean(list(risk_dict.values())):.1f})")
+    print(f"   [AnomalyScorer] Computed risk scores for {len(risk_dict)} nodes (Avg: {np.mean(list(risk_dict.values())):.1f})")
     return risk_dict

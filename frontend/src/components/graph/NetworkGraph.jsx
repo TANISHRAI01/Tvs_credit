@@ -209,7 +209,8 @@ export default function NetworkGraph({
     <div
       ref={containerRef}
       style={{
-        height,
+        height:       height || '100%',
+        minHeight:    '480px',
         width:        '100%',
         background:   'transparent',
         borderRadius: '12px',

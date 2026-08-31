@@ -253,3 +253,21 @@ class SimulateResponse(BaseModel):
     after: RiskSnapshot
     delta: RiskSnapshot
     warning: Optional[str] = None
+
+
+class ScenarioSimulateRequest(BaseModel):
+    target_ring: Optional[str] = "RING_002"
+    action: Optional[str] = "isolate_hub_dealers"
+    collateral_freeze: Optional[bool] = True
+    risk_threshold: Optional[float] = 45.0
+
+
+class ScenarioSimulateResponse(BaseModel):
+    target_ring: str
+    action: str
+    capital_saved_lakhs: float
+    contagion_arrest_rate: float
+    nodes_isolated: int
+    secondary_cascade_prevented: int
+    portfolio_default_drop_pct: float
+    summary: str

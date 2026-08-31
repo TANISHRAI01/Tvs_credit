@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Activity, ShieldCheck, AlertTriangle, Send, Cpu,
   User, Building2, Smartphone, CheckCircle2, ShieldAlert,
   Layers, ArrowRight, RefreshCw,
 } from 'lucide-react';
-import { submitApplication } from '../utils/api';
+import { submitApplication, getFraudDNA, getEvidence } from '../utils/api';
 import { getRiskLevel } from '../utils/constants';
+import FraudDNA from '../components/fraud/FraudDNA';
+import EvidenceBreakdown from '../components/fraud/EvidenceBreakdown';
 
 export default function ApplicationRisk() {
   const [formData, setFormData] = useState({
@@ -40,6 +42,60 @@ export default function ApplicationRisk() {
     ],
   });
 
+  // Live P2 data from backend
+  const [liveDNA, setLiveDNA] = useState(null);
+  const [liveEvidence, setLiveEvidence] = useState(null);
+
+  // Fetch live P2 data whenever result.application_id changes
+  useEffect(() => {
+    if (!result.application_id) return;
+    const nodeId = result.application_id;
+
+    // Fetch Fraud DNA
+    getFraudDNA(nodeId)
+      .then((data) => setLiveDNA(data))
+      .catch(() => {
+        // Fallback: construct from local fraud_dna array
+        if (result.fraud_dna && result.fraud_dna.length >= 6) {
+          setLiveDNA({
+            identity_risk: result.fraud_dna[0]?.score ?? 50,
+            device_risk: result.fraud_dna[1]?.score ?? 50,
+            dealer_risk: result.fraud_dna[2]?.score ?? 50,
+            location_risk: result.fraud_dna[3]?.score ?? 30,
+            behaviour_risk: result.fraud_dna[4]?.score ?? 40,
+            network_risk: result.fraud_dna[5]?.score ?? 45,
+            overall_risk: result.risk_score,
+          });
+        }
+      });
+
+    // Fetch Evidence
+    getEvidence(nodeId)
+      .then((data) => setLiveEvidence(data))
+      .catch(() => {
+        // Build fallback evidence from local data
+        const factors = [];
+        if (result.is_suspicious) {
+          factors.push({ description: result.alert_message, contribution: 18.0 });
+        }
+        result.connected_rings?.forEach((r) => {
+          factors.push({
+            description: `Connected to fraud ring ${r.ring_id} (risk ${r.risk_score})`,
+            contribution: r.risk_score * 0.28,
+          });
+        });
+        result.fraud_dna?.forEach((d) => {
+          if (d.score >= 70) {
+            factors.push({ description: `${d.name} elevated at ${d.score}%`, contribution: d.score * 0.12 });
+          }
+        });
+        if (factors.length === 0) {
+          factors.push({ description: 'No significant risk signals detected', contribution: -5.0 });
+        }
+        setLiveEvidence({ overall_risk: result.risk_score, factors });
+      });
+  }, [result.application_id, result.risk_score]);
+
   // Calculate dynamic Fraud DNA scores based on inputs
   const computeFraudDNA = (score, dealer, amount) => {
     const isCollusiveDealer = dealer.toUpperCase().includes('004') || dealer.toUpperCase().includes('002') || dealer.toUpperCase().includes('029');
@@ -67,6 +123,8 @@ export default function ApplicationRisk() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setLiveDNA(null);
+    setLiveEvidence(null);
 
     const payload = {
       applicant_name: formData.applicant_name,
@@ -82,17 +140,17 @@ export default function ApplicationRisk() {
     try {
       const res = await submitApplication(payload);
       
-      const computedRisk = res.risk_score && res.risk_score > 10 ? res.risk_score : (
-        formData.dealer_id.toUpperCase().includes('004') || formData.loan_amount > 400000 ? 78.4 : 22.5
-      );
+      const computedRisk = res && typeof res.risk_score === 'number' 
+        ? Math.round(res.risk_score * 10) / 10 
+        : Math.round(((formData.dealer_id.toUpperCase().includes('004') ? 55 : 15) + (Number(formData.loan_amount) / 1500000) * 30 + (formData.device_fingerprint.includes('8892') ? 15 : 0)) * 10) / 10;
 
-      const dna = computeFraudDNA(computedRisk, formData.dealer_id, formData.loan_amount);
+      const dna = computeFraudDNA(computedRisk, formData.dealer_id, Number(formData.loan_amount));
 
       setResult({
         application_id: res.application_id ?? `APP_${Math.floor(10000 + Math.random() * 90000)}`,
         risk_score: computedRisk,
         recommendation: computedRisk >= 50 ? 'REJECT / MANUAL INVESTIGATION' : 'AUTO-APPROVE — LOW RISK',
-        is_suspicious: computedRisk >= 50,
+        is_suspicious: res.is_suspicious ?? (computedRisk >= 50),
         alert_message: res.alert_message || (computedRisk >= 50 ? 'High risk signals detected across dealer and device networks.' : 'Application cleared by Digital Twin risk engine.'),
         connected_rings: res.connected_rings?.length ? res.connected_rings : (
           computedRisk >= 50 ? [{ ring_id: 'RING_002', risk_score: 55.0 }] : []
@@ -102,16 +160,16 @@ export default function ApplicationRisk() {
 
       setSubmittedAt(new Date().toLocaleTimeString());
     } catch (err) {
-      // Fallback calculation for rich offline experience
-      const simulatedScore = formData.dealer_id.toUpperCase().includes('004') || formData.loan_amount > 400000 ? 81.2 : 24.0;
-      const dna = computeFraudDNA(simulatedScore, formData.dealer_id, formData.loan_amount);
+      // Fallback dynamic calculation
+      const simulatedScore = Math.round(((formData.dealer_id.toUpperCase().includes('004') ? 55 : 15) + (Number(formData.loan_amount) / 1500000) * 30 + (formData.device_fingerprint.includes('8892') ? 15 : 0)) * 10) / 10;
+      const dna = computeFraudDNA(simulatedScore, formData.dealer_id, Number(formData.loan_amount));
       
       setResult({
         application_id: `APP_${Math.floor(10000 + Math.random() * 90000)}`,
         risk_score: simulatedScore,
         recommendation: simulatedScore >= 50 ? 'REJECT / MANUAL INVESTIGATION' : 'AUTO-APPROVE — LOW RISK',
         is_suspicious: simulatedScore >= 50,
-        alert_message: simulatedScore >= 50 ? 'Connected to collusive dealer cluster DEALER_004 and shared device.' : 'Low risk profile. Cleared for disbursement.',
+        alert_message: simulatedScore >= 50 ? 'Connected to collusive dealer cluster and shared device.' : 'Low risk profile. Cleared for disbursement.',
         connected_rings: simulatedScore >= 50 ? [{ ring_id: 'RING_002', risk_score: 55.0 }] : [],
         fraud_dna: dna,
       });
@@ -155,7 +213,7 @@ export default function ApplicationRisk() {
             </h1>
           </div>
           <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>
-            Live Graph AI loan underwriting. Dynamically injects applicants into the 18,095-node Digital Twin to compute 6D Fraud DNA & cluster attachments.
+            Live Graph AI loan underwriting with Explainable AI evidence trails and 6D Fraud DNA radar analysis.
           </p>
         </div>
 
@@ -353,7 +411,7 @@ export default function ApplicationRisk() {
             </p>
           </div>
 
-          {/* 6D Fraud DNA Dimension Decomposition */}
+          {/* 6D Fraud DNA Dimension Decomposition (original bar-based) */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
               <div style={{ fontSize: '14px', fontWeight: 800, color: '#f8fafc', fontFamily: 'Outfit, sans-serif' }}>
@@ -386,6 +444,15 @@ export default function ApplicationRisk() {
             </div>
           </div>
         </motion.div>
+      </div>
+
+      {/* ── Phase 5: Live Fraud DNA Radar + Evidence Breakdown ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
+        {/* Fraud DNA Radar (live from backend P2) */}
+        <FraudDNA dna={liveDNA} />
+
+        {/* Explainable AI Evidence (live from backend P2) */}
+        <EvidenceBreakdown evidence={liveEvidence} />
       </div>
     </div>
   );

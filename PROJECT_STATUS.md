@@ -2,8 +2,8 @@
 
 > **AI-Powered Digital Twin for Predictive Fraud Ecosystems**  
 > TVS Credit E.P.I.C. IT Case Study — Problem Statement E (Swarm Intelligence Lending Network)  
-> **Last Updated:** August 30, 2026 · 00:12 IST  
-> **Release Status:** `main` branch deployed with **Priority 1 Complete (Phases 1–4)**
+> **Last Updated:** September 1, 2026 · 01:39 IST  
+> **Release Status:** `main` branch deployed with **Priority 1 + Priority 2 Complete (Phases 1–5)**
 
 ---
 
@@ -11,8 +11,8 @@
 
 | Track | Phase 1 (Foundation) | Phase 2 (Core Intelligence) | Phase 3 (Visualization API) | Phase 4 (P1 Polish & Merge) | Phase 5 (P2 Innovations) |
 |---|:---:|:---:|:---:|:---:|:---:|
-| **Member 1 (Backend 🟦)** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ⏳ NEXT |
-| **Member 2 (Frontend 🟩)** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ⏳ NEXT |
+| **Member 1 (Backend 🟦)** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** |
+| **Member 2 (Frontend 🟩)** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** | ✅ **100% DONE** |
 
 ---
 
@@ -77,29 +77,35 @@ All endpoints are live and returning real data from the Digital Twin:
 | `GET` | `/api/emerging-ecosystems`| Networks actively forming with trajectory data | ✅ Live |
 | `GET` | `/api/alerts` | Live alert feed sorted by severity (Critical / High / Medium) | ✅ Live |
 | `POST`| `/api/applications` | Submit new loan app → dynamic graph update & instant score | ✅ Live |
+| `GET` | `/api/node/{id}/fraud-dna` | 6-dimensional Fraud DNA risk vector for any entity | ✅ Live |
+| `GET` | `/api/node/{id}/evidence` | Explainable AI evidence breakdown with point contributions | ✅ Live |
+| `GET` | `/api/risk-propagation/{id}` | BFS multi-hop risk contagion heatmap (3 hops, 0.55× decay) | ✅ Live |
+| `GET` | `/api/dealers/intelligence` | Dealer hub centrality & syndicate classification | ✅ Live |
+| `GET` | `/api/devices/intelligence` | Device sharing clusters & virtual device detection | ✅ Live |
+| `POST`| `/api/simulate` | What-If fraud intervention scenario simulation | ✅ Live |
 
 ---
 
 ## ⏳ WHAT IS LEFT TO DO
 
-### 1. Phase 4 (Priority 1 Polish & Integration — NOW)
-- [ ] Full end-to-end integration testing between frontend and backend.
-- [ ] Verify `NetworkExplorer` renders live with 18,095-node graph from backend.
-- [ ] Verify `FraudRings` lists all Louvain-detected rings with correct exposure figures.
-- [ ] Verify `FraudRingDetail` isolated subgraph renders for each ring ID.
-- [ ] Framer Motion polish pass — confirm page transitions are smooth across all new pages.
-- [ ] Merge `dev` → `main` for clean Priority 1 completion milestone.
+### 1. Phase 4 (Priority 1 Polish & Integration — COMPLETE ✅)
+- [x] Full end-to-end integration testing between frontend and backend.
+- [x] Verify `NetworkExplorer` renders live with 18,095-node graph from backend.
+- [x] Verify `FraudRings` lists all Louvain-detected rings with correct exposure figures.
+- [x] Verify `FraudRingDetail` isolated subgraph renders for each ring ID with pan/zoom and interactive canvas.
+- [x] Framer Motion polish pass — smooth page transitions across all routes.
+- [x] Full test suite (7/7 pytest passing, 0 build errors in Vite, all API endpoints 200 OK).
 
-### 2. Phase 5 (Priority 2 Innovations — Days 5–6)
+### 2. Phase 5 (Priority 2 Innovations — COMPLETE ✅)
 
 *Differentiating competition features:*
-- [ ] **Fraud DNA Engine** (`app/fraud_dna.py` & `FraudDNA.jsx`): 6-dimensional risk radar chart (Identity, Device, Dealer, Location, Behaviour, Network).
-- [ ] **Explainable AI Breakdown** (`app/explainable_ai.py` & `EvidenceBreakdown.jsx`): Human-readable evidence list (e.g. `+25 Device shared with 7 apps`).
-- [ ] **Risk Propagation Engine** (`app/risk_propagation.py`): BFS decaying risk heatmap across connected entities.
-- [ ] **What-If Fraud Simulator** (`app/what_if_simulator.py` & `WhatIfSimulator.jsx`): Interactive simulation of approving/holding loan applications with before/after network risk delta.
-- [ ] **Dealer & Device Intelligence Modules**: Specialized views for dealers acting as fraud hubs.
+- [x] **Fraud DNA Engine** (`app/fraud_dna.py` & `FraudDNA.jsx`): 6-dimensional risk radar chart (Identity, Device, Dealer, Location, Behaviour, Network).
+- [x] **Explainable AI Breakdown** (`app/explainable_ai.py` & `EvidenceBreakdown.jsx`): Human-readable evidence list with severity badges (CRITICAL/HIGH/MEDIUM/LOW) and point contributions.
+- [x] **Risk Propagation Engine** (`app/risk_propagation.py`): BFS decaying risk heatmap across connected entities (3 hops, 0.55× geometric decay).
+- [x] **What-If Fraud Simulator** (`app/main.py` & `WhatIfSimulator.jsx`): Interactive simulation of fraud interventions with capital protection and contagion arrest metrics.
+- [x] **Dealer & Device Intelligence Modules** (`app/dealer_intelligence.py` & `app/device_intelligence.py`): Hub centrality analysis for 40 dealers and sharing cluster detection across 2,188 devices.
 
-### 4. Phase 6 (Final Polish & Presentation — Day 6)
+### 3. Phase 6 (Final Polish & Presentation — Day 6)
 - [ ] Screenshots and architecture diagrams for Round 2 PPT.
 - [ ] Demo rehearsal and video walkthrough.
 

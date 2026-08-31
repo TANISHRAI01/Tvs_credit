@@ -35,12 +35,12 @@ class SentinelGraph:
         self._dealers = self._load_json("dealers.json")
         self._guarantors = self._load_json("guarantors.json")
         self._devices = self._load_json("devices.json")
-        print(f"📥 Loaded: {len(self._applications)} applications, "
+        print(f"[GraphEngine] Loaded: {len(self._applications)} applications, "
               f"{len(self._customers)} customers, {len(self._dealers)} dealers")
 
     def build_graph(self):
         """Construct the full entity graph from loaded data."""
-        print("🔨 Building Digital Twin graph...")
+        print("[GraphEngine] Building Digital Twin graph...")
 
         # Track unique entities to avoid duplicate nodes
         seen_phones = set()
@@ -119,7 +119,7 @@ class SentinelGraph:
                 seen_phones.add(mob_node_id)
                 self.graph.add_node(mob_node_id, **{
                     "type": "mobile",
-                    "label": f"📱 {phone[:5]}...{phone[-4:]}",
+                    "label": f"Mobile {phone[:5]}...{phone[-4:]}",
                     "phone": phone,
                     "risk_score": 0,
                 })
@@ -172,7 +172,7 @@ class SentinelGraph:
             # Application → through → Dealer (direct link)
             self.graph.add_edge(app_id, dealer_id, relationship="processed_by", weight=0.8)
 
-        print(f"✅ Graph built: {self.graph.number_of_nodes()} nodes, "
+        print(f"[GraphEngine] Graph built: {self.graph.number_of_nodes()} nodes, "
               f"{self.graph.number_of_edges()} edges")
         
         self._print_node_type_summary()
@@ -183,7 +183,7 @@ class SentinelGraph:
         for _, data in self.graph.nodes(data=True):
             type_counts[data.get("type", "unknown")] += 1
         
-        print("\n📊 Node Type Distribution:")
+        print("\n[GraphEngine] Node Type Distribution:")
         for node_type, count in sorted(type_counts.items()):
             print(f"   {node_type:20s}: {count}")
 
@@ -350,9 +350,38 @@ class SentinelGraph:
 
     def get_node_detail(self, node_id: str) -> dict | None:
         """Get detailed information about a single node and its connections."""
-        if not self.graph.has_node(node_id):
-            return None
+        target_id = node_id
+        if not self.graph.has_node(target_id):
+            # Try common variations
+            clean_id = node_id.upper().strip()
+            candidates = []
+            if clean_id.startswith("DEALER_"):
+                num = clean_id.replace("DEALER_", "")
+                candidates.extend([f"DLR_{num.zfill(5)}", f"DLR_{num.zfill(3)}", f"DLR_{num}"])
+            elif clean_id.startswith("DLR_"):
+                num = clean_id.replace("DLR_", "")
+                candidates.extend([f"DLR_{num.zfill(5)}", f"DLR_{num.zfill(3)}"])
+            elif clean_id.startswith("CUST_"):
+                num = clean_id.replace("CUST_", "")
+                candidates.extend([f"CUST_{num.zfill(5)}", f"CUST_{num.zfill(4)}"])
+            elif clean_id.startswith("APP_"):
+                num = clean_id.replace("APP_", "")
+                candidates.extend([f"APP_{num.zfill(5)}"])
+            
+            for c in candidates:
+                if self.graph.has_node(c):
+                    target_id = c
+                    break
+            else:
+                # Case insensitive check
+                for n in self.graph.nodes:
+                    if n.lower() == node_id.lower():
+                        target_id = n
+                        break
+                else:
+                    return None
         
+        node_id = target_id
         data = self.graph.nodes[node_id]
         connections = []
         
@@ -450,7 +479,7 @@ class SentinelGraph:
         if not self.graph.has_node(mob_node_id):
             self.graph.add_node(mob_node_id, **{
                 "type": "mobile",
-                "label": f"📱 {phone[:5]}...{phone[-4:]}",
+                "label": f"Mobile {phone[:5]}...{phone[-4:]}",
                 "risk_score": 0,
             })
         
@@ -522,7 +551,7 @@ class SentinelGraph:
         """Load a JSON file from the generated data directory."""
         filepath = DATA_DIR / filename
         if not filepath.exists():
-            print(f"⚠️  File not found: {filepath}. Run generate_synthetic_data.py first.")
+            print(f"[GraphEngine Warning] File not found: {filepath}. Run generate_synthetic_data.py first.")
             return []
         with open(filepath, "r", encoding="utf-8") as f:
             return json.load(f)

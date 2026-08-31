@@ -27,16 +27,26 @@ export default function WhatIfSimulator() {
     try {
       const res = await simulate(scenario);
       if (res) {
-        setSimulationResult((prev) => ({
-          ...prev,
+        setSimulationResult({
           capital_saved_lakhs: res.capital_saved_lakhs ?? 412.8,
           contagion_arrest_rate: res.contagion_arrest_rate ?? 96.5,
-        }));
+          nodes_isolated: res.nodes_isolated ?? 462,
+          secondary_cascade_prevented: res.secondary_cascade_prevented ?? 18,
+          portfolio_default_drop_pct: res.portfolio_default_drop_pct ?? -3.8,
+        });
       }
     } catch (_) {
-      // Keep rich demo response
+      const ringExp = scenario.target_ring === 'RING_004' ? 371.8 : scenario.target_ring === 'RING_029' ? 512.8 : scenario.target_ring === 'ALL_RINGS' ? 1820.0 : 443.4;
+      const factor = (100 - scenario.risk_threshold) / 50;
+      setSimulationResult({
+        capital_saved_lakhs: Math.round(ringExp * 0.92 * 10) / 10,
+        contagion_arrest_rate: Math.min(Math.round((85 + factor * 7) * 10) / 10, 99.4),
+        nodes_isolated: scenario.target_ring === 'ALL_RINGS' ? 2450 : 462,
+        secondary_cascade_prevented: scenario.target_ring === 'ALL_RINGS' ? 40 : 18,
+        portfolio_default_drop_pct: -3.8,
+      });
     } finally {
-      setTimeout(() => setSimulating(false), 400);
+      setTimeout(() => setSimulating(false), 300);
     }
   };
 

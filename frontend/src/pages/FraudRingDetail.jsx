@@ -236,14 +236,14 @@ export default function FraudRingDetail() {
       </motion.div>
 
       {/* ── Main 2-Column Split: Inspector + Subgraph Canvas ── */}
-      <div style={{ display: 'flex', flex: 1, gap: '18px', minHeight: 0 }}>
+      <div style={{ display: 'flex', flex: 1, gap: '18px', minHeight: '580px' }}>
 
         {/* Left: Cluster Metrics & Shared Entities */}
         <motion.div
           initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.05 }}
-          style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}
+          style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '14px', minHeight: '580px', overflowY: 'auto' }}
         >
           {/* Ring stats card */}
           <div className="inv-card" style={{ padding: '22px' }}>
@@ -294,7 +294,7 @@ export default function FraudRingDetail() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
           className="inv-card"
-          style={{ flex: 1, position: 'relative', minHeight: '520px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)' }}
+          style={{ flex: 1, position: 'relative', minHeight: '580px', height: '620px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)' }}
         >
           {nodes.length === 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '10px', color: '#64748b' }}>
