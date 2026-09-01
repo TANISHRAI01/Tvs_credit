@@ -281,10 +281,12 @@ class SentinelGraph:
         max_risk: float = 100,
         search: str | None = None,
         limit: int = 1500,
-        include_neighbors: bool = False
+        include_neighbors: bool = False,
+        sort_order: str = "desc"
     ) -> tuple[list[dict], list[dict]]:
         """
         Advanced filtered graph query with neighbor expansion and limits.
+        sort_order: "desc" (highest risk first, default) or "asc" (lowest risk first).
         """
         candidate_ids = set()
         search_lower = search.lower() if search else None
@@ -314,11 +316,12 @@ class SentinelGraph:
                 for neighbor in self.graph.neighbors(node_id):
                     final_ids.add(neighbor)
                     
-        # Apply limit prioritizing highest risk
+        # Apply limit — sort by risk (direction depends on sort_order)
+        sort_descending = (sort_order != "asc")
         sorted_nodes = sorted(
             [self._format_node(nid, self.graph.nodes[nid]) for nid in final_ids if self.graph.has_node(nid)],
             key=lambda n: n["risk_score"],
-            reverse=True
+            reverse=sort_descending
         )
         
         selected_nodes = sorted_nodes[:limit]

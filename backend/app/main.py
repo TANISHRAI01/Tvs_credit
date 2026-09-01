@@ -120,6 +120,7 @@ async def get_graph(
     ring_id: Optional[str] = Query(None, description="Filter for a specific fraud ring ID"),
     include_neighbors: bool = Query(False, description="Include 1-hop connected neighbors"),
     limit: int = Query(1500, description="Max nodes to return"),
+    sort_order: str = Query("desc", description="Sort by risk: 'desc' (high first) or 'asc' (low first)"),
 ):
     """
     Get the entity graph with advanced filtering for vis-network visualization.
@@ -155,7 +156,8 @@ async def get_graph(
         max_risk=max_risk,
         search=search,
         limit=limit,
-        include_neighbors=include_neighbors
+        include_neighbors=include_neighbors,
+        sort_order=sort_order,
     )
     
     return GraphResponse(
