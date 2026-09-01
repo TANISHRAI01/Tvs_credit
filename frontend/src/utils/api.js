@@ -29,7 +29,7 @@ api.interceptors.response.use(
 // ─── Priority 1 Endpoints ────────────────────────────────────────────────────
 
 /** Full graph (nodes + edges) for vis-network */
-export const getGraph = () => api.get('/graph');
+export const getGraph = (params = {}) => api.get('/graph', { params });
 
 /** KPI summary: total apps, networks, risk levels */
 export const getGraphStats = () => api.get('/graph/stats');

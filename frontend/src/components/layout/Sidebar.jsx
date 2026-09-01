@@ -19,7 +19,7 @@ const NAV = [
   { path: '/network', icon: Network, label: 'Network' },
   { path: '/fraud-rings', icon: ShieldAlert, label: 'Fraud Rings' },
   { path: '/ecosystems', icon: TrendingUp, label: 'Threats' },
-  { path: '/application-risk', icon: Activity, label: 'Risk' },
+  { path: '/application-risk', icon: Activity, label: 'Add Application' },
   { path: '/simulator', icon: Zap, label: 'Simulator' },
 ];
 

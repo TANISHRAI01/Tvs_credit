@@ -280,13 +280,16 @@ class SentinelGraph:
         min_risk: float = 0,
         max_risk: float = 100,
         search: str | None = None,
-        limit: int = 1500,
+        limit: int = 250,
         include_neighbors: bool = False,
         sort_order: str = "desc"
     ) -> tuple[list[dict], list[dict]]:
         """
         Advanced filtered graph query with neighbor expansion and limits.
-        sort_order: "desc" (highest risk first, default) or "asc" (lowest risk first).
+        sort_order:
+          "desc"  — highest risk first (default)
+          "asc"   — lowest risk first
+          "mixed" — stratified sample across risk tiers for representative view
         """
         candidate_ids = set()
         search_lower = search.lower() if search else None
@@ -309,22 +312,70 @@ class SentinelGraph:
                     
             candidate_ids.add(node_id)
             
-        # Optional 1-hop neighbor inclusion
+        # Optional 1-hop neighbor inclusion (only if explicitly requested)
         final_ids = set(candidate_ids)
         if include_neighbors and len(candidate_ids) < 300:
             for node_id in candidate_ids:
                 for neighbor in self.graph.neighbors(node_id):
-                    final_ids.add(neighbor)
-                    
-        # Apply limit — sort by risk (direction depends on sort_order)
-        sort_descending = (sort_order != "asc")
-        sorted_nodes = sorted(
-            [self._format_node(nid, self.graph.nodes[nid]) for nid in final_ids if self.graph.has_node(nid)],
-            key=lambda n: n["risk_score"],
-            reverse=sort_descending
-        )
+                    neighbor_risk = self.graph.nodes[neighbor].get("risk_score", 0)
+                    if min_risk <= neighbor_risk <= max_risk:
+                        final_ids.add(neighbor)
         
-        selected_nodes = sorted_nodes[:limit]
+        # Format all candidate nodes (guaranteed to satisfy min_risk <= risk <= max_risk)
+        all_formatted = [
+            self._format_node(nid, self.graph.nodes[nid])
+            for nid in final_ids if self.graph.has_node(nid)
+        ]
+        
+        if sort_order == "mixed":
+            # ── Stratified sampling across the filtered risk range ──
+            effective_min = max(min_risk, 0)
+            effective_max = min(max_risk, 100.0)
+            tier_range = effective_max - effective_min
+            
+            if tier_range <= 2.0 or len(all_formatted) <= limit:
+                selected_nodes = sorted(
+                    all_formatted,
+                    key=lambda n: n["risk_score"],
+                    reverse=True
+                )[:limit]
+            else:
+                # Create 4 equal tiers spanning the filtered range
+                tier_width = tier_range / 4.0
+                tiers = []
+                for i in range(4):
+                    t_min = effective_min + i * tier_width
+                    t_max = effective_min + (i + 1) * tier_width if i < 3 else 101.0
+                    weight = 0.15 + (i * 0.10)  # [0.15, 0.25, 0.35, 0.45]
+                    tiers.append((t_min, t_max, weight))
+                
+                total_weight = sum(w for _, _, w in tiers)
+                tiers = [(lo, hi, w / total_weight) for lo, hi, w in tiers]
+                
+                selected_nodes = []
+                for tier_min, tier_max, tier_pct in tiers:
+                    tier_budget = max(1, int(limit * tier_pct))
+                    tier_nodes = [n for n in all_formatted if tier_min <= n["risk_score"] < tier_max]
+                    tier_nodes.sort(key=lambda n: n["risk_score"], reverse=True)
+                    selected_nodes.extend(tier_nodes[:tier_budget])
+                
+                # Fill remaining budget from any tier (highest risk first)
+                already_ids = {n["id"] for n in selected_nodes}
+                leftover = [n for n in all_formatted if n["id"] not in already_ids]
+                leftover.sort(key=lambda n: n["risk_score"], reverse=True)
+                remaining_budget = limit - len(selected_nodes)
+                if remaining_budget > 0:
+                    selected_nodes.extend(leftover[:remaining_budget])
+        else:
+            # Standard sort
+            sort_descending = (sort_order != "asc")
+            sorted_nodes = sorted(
+                all_formatted,
+                key=lambda n: n["risk_score"],
+                reverse=sort_descending
+            )
+            selected_nodes = sorted_nodes[:limit]
+        
         selected_ids = {n["id"] for n in selected_nodes}
         
         edges = []

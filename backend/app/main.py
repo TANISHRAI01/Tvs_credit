@@ -119,7 +119,7 @@ async def get_graph(
     search: Optional[str] = Query(None, description="Search term for labels/IDs/cities"),
     ring_id: Optional[str] = Query(None, description="Filter for a specific fraud ring ID"),
     include_neighbors: bool = Query(False, description="Include 1-hop connected neighbors"),
-    limit: int = Query(1500, description="Max nodes to return"),
+    limit: int = Query(250, description="Max nodes to return"),
     sort_order: str = Query("desc", description="Sort by risk: 'desc' (high first) or 'asc' (low first)"),
 ):
     """
